@@ -13,6 +13,14 @@
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; overflow: hidden; }
 
+    /* 強制隱藏 A-Frame 產生的任何中央圓點與預設游標 */
+    .a-canvas { cursor: default !important; }
+    .a-cursor-ring, .a-mouse-cursor-inner, a-cursor {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
     /* 頂部極簡導覽列 */
     #navbar {
       position: absolute;
@@ -127,7 +135,7 @@
   </div>
 
   <!-- 3D 展覽場景 -->
-  <a-scene networked-scene="room: custom-hd-gallery; debug: true; adapter: wseasyrtc;">
+  <a-scene networked-scene="room: custom-hd-gallery; debug: true; adapter: wseasyrtc;" raycaster="objects: .clickable">
     <a-assets>
       <template id="avatar-template">
         <a-entity class="avatar">
@@ -144,13 +152,14 @@
     <!-- 動態畫作容器 -->
     <a-entity id="gallery-wall"></a-entity>
 
-    <!-- 視角與隱藏圓點 cursor -->
+    <!-- 純原生滑鼠點擊，無實體 Cursor 標籤 -->
     <a-entity id="rig" movement-controls position="0 1.6 0">
-      <a-entity id="player" camera look-controls wasd-controls>
-        <!-- 啟用滑鼠直接點擊，無中央圓點 -->
-        <a-entity raycaster="objects: .clickable" cursor="rayOrigin: mouse"></a-entity>
+      <a-entity id="player" camera look-controls="pointerLockEnabled: false" wasd-controls>
       </a-entity>
     </a-entity>
+
+    <!-- 將 raycaster 綁定在場景層級，徹底移除 3D 畫面中的中央圓點元件 -->
+    <a-entity cursor="rayOrigin: mouse" raycaster="objects: .clickable"></a-entity>
   </a-scene>
 
   <script>
@@ -187,7 +196,6 @@
       const artEntity = document.createElement('a-entity');
       artEntity.setAttribute('id', data.id);
 
-      // 計算放置位置 (左右交錯)
       const xPos = (imageCount % 2 === 1) ? -4.5 : 4.5;
       const yPos = 4.0;
       const zPos = -7.8;
@@ -195,7 +203,7 @@
 
       // 1. 立體木質畫框 (加厚外框)
       const frame = document.createElement('a-box');
-      frame.setAttribute('color', '#1e1b18'); // 深木色畫框
+      frame.setAttribute('color', '#1e1b18');
       frame.setAttribute('width', '3.2');
       frame.setAttribute('height', '2.4');
       frame.setAttribute('depth', '0.1');
@@ -214,8 +222,7 @@
       img.setAttribute('width', '2.7');
       img.setAttribute('height', '1.9');
       img.setAttribute('position', '0 0 0.02');
-      img.setAttribute('class', 'clickable'); // 可點擊
-      // 設定高清晰度濾鏡
+      img.setAttribute('class', 'clickable');
       img.setAttribute('material', 'npot: true; anisotropy: 16;');
 
       // 4. 掛畫繩索細節
