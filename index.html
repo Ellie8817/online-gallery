@@ -11,79 +11,79 @@
   <script src="https://unpkg.com/networked-aframe@^0.8.4/dist/networked-aframe.min.js"></script>
 
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; overflow: hidden; background: #f8fafc; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; overflow: hidden; background: #0f172a; }
 
     /* 隱藏預設游標 */
     .a-canvas { cursor: default !important; }
     .a-cursor-ring, .a-mouse-cursor-inner, a-cursor { display: none !important; opacity: 0 !important; visibility: hidden !important; }
 
-    /* 入場沉浸式遮罩 (亮色白/天藍微光夢想風格) */
+    /* 入場沉浸式遮罩 (沉穩極致高級藝廊風) */
     #welcome-overlay {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: radial-gradient(circle at center, #ffffff 0%, #e2e8f0 100%);
+      background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
       backdrop-filter: blur(20px); z-index: 9999;
-      display: flex; flex-direction: column; justify-content: center; align-items: center; color: #0f172a; text-align: center;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; color: #f8fafc; text-align: center;
     }
-    #welcome-overlay .dream-subtitle { font-size: 13px; letter-spacing: 6px; color: #0284c7; text-transform: uppercase; margin-bottom: 12px; font-weight: 700; }
-    #welcome-overlay h1 { font-size: 32px; font-weight: 400; letter-spacing: 4px; margin: 0 0 12px 0; color: #0f172a; }
-    #welcome-overlay p { font-size: 14px; color: #475569; max-width: 460px; line-height: 1.8; margin-bottom: 24px; }
+    #welcome-overlay .dream-subtitle { font-size: 13px; letter-spacing: 6px; color: #fbbf24; text-transform: uppercase; margin-bottom: 12px; font-weight: 700; }
+    #welcome-overlay h1 { font-size: 32px; font-weight: 300; letter-spacing: 4px; margin: 0 0 12px 0; color: #f8fafc; }
+    #welcome-overlay p { font-size: 14px; color: #94a3b8; max-width: 460px; line-height: 1.8; margin-bottom: 24px; }
     .btn-enter {
-      background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #ffffff; border: none; padding: 14px 42px; border-radius: 30px;
-      font-size: 15px; font-weight: 600; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4);
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; border: none; padding: 14px 42px; border-radius: 30px;
+      font-size: 15px; font-weight: 600; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
     }
-    .btn-enter:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 15px 30px rgba(56, 189, 248, 0.6); }
+    .btn-enter:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 15px 30px rgba(245, 158, 11, 0.5); }
 
     /* 操作提示面板 */
     #nav-instructions {
       position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 999;
-      background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8);
-      padding: 8px 20px; border-radius: 20px; color: #334155; font-size: 12px; pointer-events: none;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center;
+      background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px 20px; border-radius: 20px; color: #cbd5e1; font-size: 12px; pointer-events: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3); text-align: center;
     }
 
-    /* 頂部白色極簡導覽列 */
+    /* 頂部半透明質感導覽列 */
     #navbar {
       position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999;
-      background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(226, 232, 240, 0.8);
-      padding: 8px 24px; border-radius: 40px; display: flex; align-items: center; gap: 16px; color: #0f172a; box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 8px 24px; border-radius: 40px; display: flex; align-items: center; gap: 16px; color: #f8fafc; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     }
-    #exhibition-title { font-size: 14px; font-weight: 600; letter-spacing: 1.5px; color: #0f172a; }
+    #exhibition-title { font-size: 14px; font-weight: 600; letter-spacing: 1.5px; color: #f8fafc; }
 
     .nav-btn {
-      background: rgba(241, 245, 249, 0.8); border: 1px solid rgba(203, 213, 225, 0.8); color: #1e293b;
+      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #f1f5f9;
       padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-weight: 500;
     }
-    .nav-btn:hover { background: #e2e8f0; }
+    .nav-btn:hover { background: rgba(255, 255, 255, 0.2); }
 
-    #user-badge { font-size: 12px; color: #0284c7; font-weight: 600; }
+    #user-badge { font-size: 12px; color: #fbbf24; font-weight: 600; }
 
-    /* 通用 Modal 彈窗樣式 (亮色調質感) */
+    /* 通用 Modal 彈窗樣式 (暗色質感風格) */
     .modal-panel {
       display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;
-      background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(226, 232, 240, 0.9);
-      padding: 28px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); width: 440px; max-width: 90vw; max-height: 85vh; overflow-y: auto; color: #0f172a;
+      background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 28px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); width: 440px; max-width: 90vw; max-height: 85vh; overflow-y: auto; color: #f8fafc;
     }
-    .modal-panel h3 { margin: 0 0 12px 0; color: #0f172a; font-size: 20px; font-weight: 600; }
-    .modal-close { position: absolute; top: 18px; right: 20px; background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
+    .modal-panel h3 { margin: 0 0 12px 0; color: #f8fafc; font-size: 20px; font-weight: 600; }
+    .modal-close { position: absolute; top: 18px; right: 20px; background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; }
 
     /* 表單輸入 */
     .form-group { margin-bottom: 14px; text-align: left; }
-    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 6px; }
     .form-group input, .form-group textarea {
-      width: 100%; box-sizing: border-box; padding: 10px 14px; background: #f8fafc; border: 1px solid #cbd5e1;
-      border-radius: 10px; font-size: 13px; color: #0f172a; outline: none; transition: border-color 0.2s;
+      width: 100%; box-sizing: border-box; padding: 10px 14px; background: #1e293b; border: 1px solid #334155;
+      border-radius: 10px; font-size: 13px; color: #f8fafc; outline: none; transition: border-color 0.2s;
     }
-    .form-group input:focus, .form-group textarea:focus { border-color: #0284c7; }
+    .form-group input:focus, .form-group textarea:focus { border-color: #fbbf24; }
 
     /* 作品詳細點擊彈窗 */
-    #art-modal .project-no { font-size: 12px; color: #0284c7; font-weight: 700; margin-bottom: 4px; }
-    #art-modal .author { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 14px; }
-    #art-modal .desc { font-size: 14px; color: #334155; line-height: 1.7; margin-bottom: 16px; }
+    #art-modal .project-no { font-size: 12px; color: #fbbf24; font-weight: 700; margin-bottom: 4px; }
+    #art-modal .author { font-size: 13px; color: #94a3b8; font-weight: 500; margin-bottom: 14px; }
+    #art-modal .desc { font-size: 14px; color: #cbd5e1; line-height: 1.7; margin-bottom: 16px; }
 
     .image-preview-container { width: 100%; text-align: center; margin-bottom: 14px; }
     .image-preview-container img {
       max-width: 100%; max-height: 300px; border-radius: 12px; object-fit: contain; cursor: zoom-in;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1); transition: transform 0.2s;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4); transition: transform 0.2s;
     }
     .image-preview-container img:hover { transform: scale(1.02); }
 
@@ -91,25 +91,25 @@
     .btn-danger:hover { background: #dc2626; }
 
     /* 觀看留言區 */
-    .comments-section { border-top: 1px solid #e2e8f0; padding-top: 14px; margin-top: 14px; }
-    .comments-title { font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 10px; }
-    .comments-list { max-height: 110px; overflow-y: auto; font-size: 13px; color: #334155; margin-bottom: 10px; }
-    .comment-item { background: #f1f5f9; padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; border: 1px solid #e2e8f0; }
+    .comments-section { border-top: 1px solid #334155; padding-top: 14px; margin-top: 14px; }
+    .comments-title { font-weight: 600; font-size: 13px; color: #94a3b8; margin-bottom: 10px; }
+    .comments-list { max-height: 110px; overflow-y: auto; font-size: 13px; color: #e2e8f0; margin-bottom: 10px; }
+    .comment-item { background: #1e293b; padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; border: 1px solid #334155; }
     .comment-input-group { display: flex; gap: 8px; }
-    .comment-input-group input { flex: 1; padding: 8px 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; color: #0f172a; }
+    .comment-input-group input { flex: 1; padding: 8px 12px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #f8fafc; }
 
     /* 全螢幕大圖燈箱 */
     #full-lightbox {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(255,255,255,0.95); z-index: 2000; justify-content: center; align-items: center;
+      background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center;
     }
-    #full-lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 8px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); object-fit: contain; }
-    #full-lightbox .close-lightbox { position: absolute; top: 20px; right: 30px; color: #0f172a; font-size: 36px; cursor: pointer; }
+    #full-lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 8px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); object-fit: contain; }
+    #full-lightbox .close-lightbox { position: absolute; top: 20px; right: 30px; color: #f8fafc; font-size: 36px; cursor: pointer; }
 
     /* 後台紀錄視窗 (Admin Dashboard) */
-    #admin-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 12px; color: #334155; }
-    #admin-table th, #admin-table td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
-    #admin-table th { background: #f1f5f9; color: #0284c7; font-weight: 600; }
+    #admin-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 12px; color: #cbd5e1; }
+    #admin-table th, #admin-table td { border: 1px solid #334155; padding: 10px; text-align: left; }
+    #admin-table th { background: #1e293b; color: #fbbf24; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -118,7 +118,7 @@
   <div id="welcome-overlay">
     <div class="dream-subtitle">YOUTH DREAM FUND EXHIBITION</div>
     <h1>青年百億圓夢計劃 成果展</h1>
-    <p>踏入明亮夢幻的白色光影 PhotoVogue 藝廊。<br>點擊地面即可傳送移動，拖曳滑鼠轉動視角。</p>
+    <p>踏入經典雅致的 PhotoVogue 沉浸光影藝廊。<br>點擊地面即可傳送移動，拖曳滑鼠轉動視角。</p>
     <button class="btn-enter" onclick="enterGallery()">開啟音樂並踏入展廳</button>
   </div>
 
@@ -140,7 +140,7 @@
   <div id="login-modal" class="modal-panel">
     <button class="modal-close" onclick="closeModal('login-modal')">✕</button>
     <h3>策展人登入驗證</h3>
-    <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">請建立策展資料以獲得作品上傳與個人管理權限（每人限上傳 3 張作品）。</p>
+    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">請建立策展資料以獲得作品上傳與個人管理權限（每人限上傳 3 張作品）。</p>
     <div class="form-group"><label>策展人姓名 *</label><input type="text" id="reg-name" placeholder="請輸入姓名"></div>
     <div class="form-group"><label>參加計畫名稱 *</label><input type="text" id="reg-program" placeholder="例如：青年百億圓夢計畫"></div>
     <div class="form-group"><label>梯次 *</label><input type="text" id="reg-batch" placeholder="例如：2026 第一期"></div>
@@ -167,7 +167,7 @@
     
     <div class="image-preview-container">
       <img id="modal-img-preview" src="" alt="作品原圖" onclick="openLightbox()">
-      <div style="font-size: 11px; color: #64748b; margin-top: 6px;">🔍 點擊圖片開啟高清原圖檢視</div>
+      <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">🔍 點擊圖片開啟高清原圖檢視</div>
     </div>
 
     <div class="desc" id="modal-desc">作品介紹...</div>
@@ -177,7 +177,7 @@
       <div class="comments-list" id="modal-comments-list"></div>
       <div class="comment-input-group">
         <input type="text" id="comment-input" placeholder="寫下你的心得..." onkeydown="if(event.key==='Enter') submitComment()">
-        <button class="nav-btn" style="background:#0284c7; color:white;" onclick="submitComment()">送出</button>
+        <button class="nav-btn" style="background:#d97706; color:white;" onclick="submitComment()">送出</button>
       </div>
     </div>
 
@@ -215,13 +215,13 @@
     <img id="lightbox-img" src="" alt="高解析原圖">
   </div>
 
-  <!-- 3D 展覽場景 (白色純淨風格 + 聚光燈精準打在作品上) -->
+  <!-- 3D 展覽場景 (莫蘭迪暗色氛圍 + 每幅作品專屬高質感黃光聚光燈) -->
   <a-scene networked-scene="room: photovogue-aurora-gallery-v5; debug: true; adapter: wseasyrtc;" raycaster="objects: .clickable">
     
     <a-assets>
       <template id="avatar-template">
         <a-entity class="avatar">
-          <a-sphere class="head" color="#0284c7" radius="0.2" position="0 0.2 0"></a-sphere>
+          <a-sphere class="head" color="#fbbf24" radius="0.2" position="0 0.2 0"></a-sphere>
         </a-entity>
       </template>
 
@@ -231,46 +231,44 @@
       <audio id="bgm-3" src="https://cdn.pixabay.com/download/audio/2022/11/06/audio_c1871a3915.mp3?filename=gentle-piano-ambient-126241.mp3" preload="auto"></audio>
     </a-assets>
 
-    <!-- 1. 白色／純淨純白天空背景 -->
-    <a-sky color="#ffffff"></a-sky>
+    <!-- 1. 沉穩深邃夜空背景 -->
+    <a-sky color="#0b0f19"></a-sky>
 
-    <!-- 天空背景夢幻藝術極光雲彩 (柔和夢幻色調) -->
-    <a-plane position="0 25 -40" width="120" height="40" color="#38bdf8" material="shader: flat; opacity: 0.15; transparent: true;"></a-plane>
-    <a-plane position="0 20 -40" width="100" height="30" color="#c084fc" material="shader: flat; opacity: 0.12; transparent: true;"></a-plane>
-    <a-plane position="0 15 -40" width="80" height="20" color="#fef08a" material="shader: flat; opacity: 0.18; transparent: true;"></a-plane>
+    <!-- 天空背景夢幻藝術極光（暗色背景下襯托黃光的深藍與紫色漸層） -->
+    <a-plane position="0 25 -40" width="120" height="40" color="#1e3a8a" material="shader: flat; opacity: 0.2; transparent: true;"></a-plane>
+    <a-plane position="0 20 -40" width="100" height="30" color="#581c87" material="shader: flat; opacity: 0.15; transparent: true;"></a-plane>
 
-    <!-- 2. 白色明亮地磚 (60m x 60m 空間，點擊即可進行 Teleport 點對點移動) -->
-    <a-plane id="ground" class="clickable" position="0 0 0" rotation="-90 0 0" width="60" height="60" color="#f1f5f9" material="roughness: 0.1; metalness: 0.1"></a-plane>
+    <!-- 2. 高級深色莫蘭迪灰石質感地磚 (60m x 60m 空間，點擊即可進行 Teleport 移動) -->
+    <a-plane id="ground" class="clickable" position="0 0 0" rotation="-90 0 0" width="60" height="60" color="#111827" material="roughness: 0.2; metalness: 0.5"></a-plane>
     
-    <!-- 地板極簡微光網格 -->
-    <a-plane position="0 0.01 0" rotation="-90 0 0" width="58" height="58" color="#cbd5e1" material="wireframe: true; wireframeLinewidth: 1; opacity: 0.3; transparent: true;"></a-plane>
+    <!-- 地板幾何極簡金色微光格線 -->
+    <a-plane position="0 0.01 0" rotation="-90 0 0" width="58" height="58" color="#334155" material="wireframe: true; wireframeLinewidth: 1; opacity: 0.2; transparent: true;"></a-plane>
 
-    <!-- 天花板 (白色極簡設計) -->
-    <a-plane position="0 10 0" rotation="90 0 0" width="60" height="60" color="#f8fafc"></a-plane>
+    <!-- 天花板 (暗莫蘭迪灰) -->
+    <a-plane position="0 10 0" rotation="90 0 0" width="60" height="60" color="#0f172a"></a-plane>
 
-    <!-- 全局柔和漫射光（確保展廳基礎亮度，不產生重陰影） -->
-    <a-entity light="type: ambient; color: #ffffff; intensity: 0.65;"></a-entity>
+    <!-- 低強度微弱漫射光（維持場景基本輪廓，讓專屬黃光聚光燈成為視覺焦點） -->
+    <a-entity light="type: ambient; color: #94a3b8; intensity: 0.25;"></a-entity>
 
-    <!-- 3. 超廣闊外圍白色牆面 (60m x 60m)，設有實體防穿透阻擋區 -->
-    <a-box class="obstacle" position="0 5 -30" width="60" height="10" depth="1" color="#ffffff"></a-box>
-    <a-box class="obstacle" position="0 5 30" width="60" height="10" depth="1" color="#ffffff"></a-box>
-    <a-box class="obstacle" position="-30 5 0" width="1" height="10" depth="60" color="#ffffff"></a-box>
-    <a-box class="obstacle" position="20 5 0" width="1" height="10" depth="60" color="#ffffff"></a-box>
+    <!-- 3. 超廣闊外圍莫蘭迪灰牆面 (60m x 60m)，設有實體防穿透阻擋區 -->
+    <a-box class="obstacle" position="0 5 -30" width="60" height="10" depth="1" color="#1e293b" material="roughness: 0.8;"></a-box>
+    <a-box class="obstacle" position="0 5 30" width="60" height="10" depth="1" color="#1e293b" material="roughness: 0.8;"></a-box>
+    <a-box class="obstacle" position="-30 5 0" width="1" height="10" depth="60" color="#1e293b" material="roughness: 0.8;"></a-box>
+    <a-box class="obstacle" position="20 5 0" width="1" height="10" depth="60" color="#1e293b" material="roughness: 0.8;"></a-box>
 
-    <!-- 4. 中央 PhotoVogue 經典質感雙面屏風牆 (白銀色質感，實體阻擋，不可穿透) -->
-    <a-box class="obstacle" position="-12 5 -10" rotation="0 20 0" width="0.4" height="9" depth="18" color="#e2e8f0" material="metalness: 0.2; roughness: 0.3"></a-box>
-    <a-box class="obstacle" position="12 5 -10" rotation="0 -20 0" width="0.4" height="9" depth="18" color="#e2e8f0" material="metalness: 0.2; roughness: 0.3"></a-box>
-    <a-box class="obstacle" position="-12 5 12" rotation="0 -15 0" width="0.4" height="9" depth="18" color="#e2e8f0" material="metalness: 0.2; roughness: 0.3"></a-box>
-    <a-box class="obstacle" position="12 5 12" rotation="0 15 0" width="0.4" height="9" depth="18" color="#e2e8f0" material="metalness: 0.2; roughness: 0.3"></a-box>
+    <!-- 4. 中央 PhotoVogue 經典屏風牆 (深灰色金屬質感，實體阻擋，不可穿透) -->
+    <a-box class="obstacle" position="-12 5 -10" rotation="0 20 0" width="0.4" height="9" depth="18" color="#334155" material="metalness: 0.3; roughness: 0.4"></a-box>
+    <a-box class="obstacle" position="12 5 -10" rotation="0 -20 0" width="0.4" height="9" depth="18" color="#334155" material="metalness: 0.3; roughness: 0.4"></a-box>
+    <a-box class="obstacle" position="-12 5 12" rotation="0 -15 0" width="0.4" height="9" depth="18" color="#334155" material="metalness: 0.3; roughness: 0.4"></a-box>
+    <a-box class="obstacle" position="12 5 12" rotation="0 15 0" width="0.4" height="9" depth="18" color="#334155" material="metalness: 0.3; roughness: 0.4"></a-box>
 
-    <!-- 5. 夢想裝飾藝術（幾何光環與漂浮星粒子） -->
-    <a-torus position="0 8.5 0" rotation="90 0 0" radius="6" radius-tubular="0.04" color="#38bdf8" material="shader: flat; opacity: 0.75; transparent: true;"></a-torus>
-    <a-torus position="0 8.2 0" rotation="90 0 0" radius="6.4" radius-tubular="0.02" color="#c084fc" material="shader: flat; opacity: 0.6; transparent: true;"></a-torus>
+    <!-- 5. 頂部金色夢想光暈環 -->
+    <a-torus position="0 8.5 0" rotation="90 0 0" radius="6" radius-tubular="0.03" color="#fbbf24" material="shader: flat; opacity: 0.6; transparent: true;"></a-torus>
 
-    <!-- 幾何夢想微光粒子 -->
+    <!-- 幾何微光粒子 -->
     <a-entity id="dream-particles"></a-entity>
 
-    <!-- 動態展位與燈光容器 -->
+    <!-- 動態展位與黃光聚光燈容器 -->
     <a-entity id="gallery-slots"></a-entity>
 
     <!-- 6. 玩家視角與滑鼠/點擊移動控制系統 -->
@@ -303,7 +301,6 @@
     }
 
     function playBGM() {
-      // 停止所有音樂，播放當前索引音樂
       playlist.forEach(id => {
         const a = document.getElementById(id);
         if (a) { a.pause(); a.currentTime = 0; }
@@ -317,7 +314,6 @@
           document.getElementById('music-btn').textContent = '🎵 音樂：播放中';
         }).catch(err => console.log("Music play blocked:", err));
 
-        // 自動無縫輪播下一首
         audio.onended = () => {
           currentTrack = (currentTrack + 1) % playlist.length;
           playBGM();
@@ -348,14 +344,11 @@
         if (!evt.detail || !evt.detail.intersection) return;
         const pt = evt.detail.intersection.point;
 
-        // 嚴格邊界檢查，確保不越牆
         let targetX = Math.max(BOUNDS.minX, Math.min(BOUNDS.maxX, pt.x));
         let targetZ = Math.max(BOUNDS.minZ, Math.min(BOUNDS.maxZ, pt.z));
 
-        // 碰撞區域避障（中央四座屏風牆防穿越）
         if (isInsideObstacle(targetX, targetZ)) return;
 
-        // 平滑漸進移動至點擊點
         smoothTeleport(rig, targetX, targetZ);
       });
     }
@@ -371,12 +364,12 @@
     function smoothTeleport(rig, targetX, targetZ) {
       const startPos = rig.getAttribute('position');
       const startTime = performance.now();
-      const duration = 400; // 400ms 動畫傳送
+      const duration = 400;
 
       function animate(time) {
         const elapsed = time - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        const ease = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+        const ease = 1 - Math.pow(1 - progress, 3);
 
         const currX = startPos.x + (targetX - startPos.x) * ease;
         const currZ = startPos.z + (targetZ - startPos.z) * ease;
@@ -391,7 +384,7 @@
       requestAnimationFrame(animate);
     }
 
-    // 4. 動態產生夢想氣氛微光粒子 (亮藍、亮紫色調)
+    // 4. 動態產生微光金色粒子
     function createDreamParticles() {
       const container = document.getElementById('dream-particles');
       for (let i = 0; i < 36; i++) {
@@ -399,17 +392,17 @@
         const x = (Math.random() - 0.5) * 48;
         const y = 1.5 + Math.random() * 6.5;
         const z = (Math.random() - 0.5) * 48;
-        const radius = 0.04 + Math.random() * 0.06;
+        const radius = 0.03 + Math.random() * 0.05;
 
         sphere.setAttribute('position', `${x} ${y} ${z}`);
         sphere.setAttribute('radius', radius.toString());
-        sphere.setAttribute('color', Math.random() > 0.5 ? '#38bdf8' : '#a855f7');
-        sphere.setAttribute('material', 'shader: flat; opacity: 0.7; transparent: true;');
+        sphere.setAttribute('color', '#fbbf24');
+        sphere.setAttribute('material', 'shader: flat; opacity: 0.6; transparent: true;');
         container.appendChild(sphere);
       }
     }
 
-    // 5. 自動生成 52 個展位座標 (包含廣闊外圍牆面與中央雙面屏風)
+    // 5. 自動生成 52 個展位座標
     const SLOT_DEFINITIONS = [];
 
     function generateSlotDefinitions() {
@@ -465,24 +458,41 @@
 
         const occupiedData = galleryStore[slot.id];
 
-        // 精準專屬聚光燈 (Spotlight)：直接投射於每張照片與說明牌上
+        // 🌟 核心高質感改善：極具質感的金黃色暖色調聚光燈（Spotlight）
         const spotlight = document.createElement('a-entity');
         spotlight.setAttribute('light', {
           type: 'spot',
-          color: '#ffffff',
-          intensity: 1.8,
-          angle: 35,
-          penumbra: 0.2,
+          color: '#fff3d1',  // 高質感溫暖金黃色
+          intensity: 3.2,     // 提高聚光強度，創造強烈光影落差
+          angle: 30,          // 完美的錐形光束角度
+          penumbra: 0.5,      // 柔和自然的光芒擴散邊緣
           target: `#target-${slot.id}`
         });
-        spotlight.setAttribute('position', '0 1.5 1.8'); // 位於照片前方上方
+        spotlight.setAttribute('position', '0 2.2 1.5'); // 位於畫作上方前側
 
-        // 聚光燈瞄準的 Target (位於畫作中心位置)
+        // 燈具實體模型（黑屬金屬質感燈罩 + 暖光發光體）
+        const fixtureBox = document.createElement('a-box');
+        fixtureBox.setAttribute('color', '#0f172a');
+        fixtureBox.setAttribute('width', '0.2');
+        fixtureBox.setAttribute('height', '0.15');
+        fixtureBox.setAttribute('depth', '0.3');
+        fixtureBox.setAttribute('position', '0 2.2 1.4');
+        fixtureBox.setAttribute('rotation', '-25 0 0');
+
+        const bulbGlow = document.createElement('a-sphere');
+        bulbGlow.setAttribute('color', '#fbbf24');
+        bulbGlow.setAttribute('radius', '0.06');
+        bulbGlow.setAttribute('position', '0 2.15 1.35');
+        bulbGlow.setAttribute('material', 'shader: flat; opacity: 0.9;');
+
+        // 聚光燈瞄準標靶 (位於畫作中心位置)
         const targetObj = document.createElement('a-entity');
         targetObj.setAttribute('id', `target-${slot.id}`);
         targetObj.setAttribute('position', '0 0 0');
 
         slotGroup.appendChild(spotlight);
+        slotGroup.appendChild(fixtureBox);
+        slotGroup.appendChild(bulbGlow);
         slotGroup.appendChild(targetObj);
 
         if (occupiedData) {
@@ -495,19 +505,25 @@
       });
     }
 
-    // 渲染未上傳展位（白色明亮虛線質感）
+    // 渲染未上傳展位（深色背景襯托金黃虛線框）
     function renderEmptySlot(group, slotId) {
       const emptyBox = document.createElement('a-plane');
-      emptyBox.setAttribute('color', '#ffffff');
+      emptyBox.setAttribute('color', '#1e293b');
       emptyBox.setAttribute('width', '2.4');
       emptyBox.setAttribute('height', '1.8');
-      emptyBox.setAttribute('material', 'side: double; opacity: 0.85; transparent: true;');
+      emptyBox.setAttribute('material', 'side: double; roughness: 0.5;');
       emptyBox.setAttribute('class', 'clickable');
+
+      const border = document.createElement('a-plane');
+      border.setAttribute('color', '#fbbf24');
+      border.setAttribute('width', '2.45');
+      border.setAttribute('height', '1.85');
+      border.setAttribute('position', '0 0 -0.005');
 
       const text = document.createElement('a-text');
       text.setAttribute('value', '＋ 點擊策展上傳');
       text.setAttribute('align', 'center');
-      text.setAttribute('color', '#0284c7');
+      text.setAttribute('color', '#fbbf24');
       text.setAttribute('width', '3.4');
       text.setAttribute('position', '0 0 0.02');
 
@@ -518,40 +534,43 @@
         handleSlotClickForUpload(slotId);
       });
 
+      group.appendChild(border);
       group.appendChild(emptyBox);
     }
 
-    // 渲染已上傳作品 (純白畫框、深色高質感說明牌)
+    // 渲染已上傳作品 (高級深色畫框、頂部金黃光照質感)
     function renderArtSlot(group, data, slotId) {
-      // 1. 白色相框
+      // 1. 高級深黑金色質感畫框
       const frame = document.createElement('a-box');
-      frame.setAttribute('color', '#ffffff');
+      frame.setAttribute('color', '#0f172a');
       frame.setAttribute('width', (data.aspectWidth || 2.6).toString());
       frame.setAttribute('height', (data.aspectHeight || 2.0).toString());
-      frame.setAttribute('depth', '0.04');
+      frame.setAttribute('depth', '0.06');
       frame.setAttribute('position', '0 0 -0.02');
+      frame.setAttribute('material', 'metalness: 0.5; roughness: 0.2;');
 
       // 2. 相片本體
       const img = document.createElement('a-image');
       img.setAttribute('src', data.url);
-      img.setAttribute('width', (data.aspectWidth || 2.5).toString());
-      img.setAttribute('height', (data.aspectHeight || 1.9).toString());
-      img.setAttribute('position', '0 0 0.01');
+      img.setAttribute('width', ((data.aspectWidth || 2.6) - 0.15).toString());
+      img.setAttribute('height', ((data.aspectHeight || 2.0) - 0.15).toString());
+      img.setAttribute('position', '0 0 0.02');
       img.setAttribute('class', 'clickable');
       img.setAttribute('material', 'npot: true; anisotropy: 16; mipmaps: true;');
 
-      // 3. 正下方說明牌
+      // 3. 深色高質感黃銅金字說明牌
       const plateY = -((data.aspectHeight || 2.0) / 2) - 0.45;
       const plate = document.createElement('a-plane');
-      plate.setAttribute('color', '#ffffff');
+      plate.setAttribute('color', '#1e293b');
       plate.setAttribute('width', '2.5');
       plate.setAttribute('height', '0.65');
-      plate.setAttribute('position', `0 ${plateY} 0.01`);
+      plate.setAttribute('position', `0 ${plateY} 0.02`);
+      plate.setAttribute('material', 'metalness: 0.3; roughness: 0.3;');
 
       const plateText = document.createElement('a-text');
       plateText.setAttribute('value', `代號：${data.user.code}\n${data.title}\n創作者：${data.user.name}`);
       plateText.setAttribute('align', 'center');
-      plateText.setAttribute('color', '#0f172a');
+      plateText.setAttribute('color', '#fbbf24'); // 尊榮黃金字體
       plateText.setAttribute('width', '3.2');
       plateText.setAttribute('position', '0 0 0.01');
       plate.appendChild(plateText);
@@ -774,7 +793,7 @@
             <td>${art.user ? art.user.program : '-'} / ${art.user ? art.user.batch : '-'}</td>
             <td><code>${art.user ? art.user.code : '-'}</code></td>
             <td>${art.title}</td>
-            <td><span style="color:#0284c7; font-weight:600;">${art.id}</span></td>
+            <td><span style="color:#fbbf24; font-weight:600;">${art.id}</span></td>
           `;
           tbody.appendChild(tr);
         });
