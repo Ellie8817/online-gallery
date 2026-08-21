@@ -9,7 +9,7 @@
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
 
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; overflow: hidden; background: #1e293b; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; overflow: hidden; background: #0f172a; }
 
     .a-canvas { cursor: default !important; }
     .a-cursor-ring, .a-mouse-cursor-inner, a-cursor { display: none !important; opacity: 0 !important; visibility: hidden !important; }
@@ -18,7 +18,7 @@
     #welcome-overlay {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      backdrop-filter: blur(20px); z-index: 9999;
+      backdrop-filter: blur(20px); z-index: 99999;
       display: flex; flex-direction: column; justify-content: center; align-items: center; color: #f8fafc; text-align: center;
     }
     #welcome-overlay .dream-subtitle { font-size: 14px; letter-spacing: 6px; color: #38bdf8; text-transform: uppercase; margin-bottom: 12px; font-weight: 700; }
@@ -58,7 +58,7 @@
 
     /* 通用 Modal 彈窗樣式 */
     .modal-panel {
-      display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;
+      display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000;
       background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.15);
       padding: 28px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); width: 440px; max-width: 90vw; max-height: 85vh; overflow-y: auto; color: #f8fafc;
     }
@@ -97,7 +97,7 @@
 
     #full-lightbox {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center;
+      background: rgba(0,0,0,0.9); z-index: 20000; justify-content: center; align-items: center;
     }
     #full-lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 8px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); object-fit: contain; }
     #full-lightbox .close-lightbox { position: absolute; top: 20px; right: 30px; color: #ffffff; font-size: 36px; cursor: pointer; }
@@ -254,7 +254,7 @@
     <a-entity light="type: ambient; color: #ffffff; intensity: 1.2;"></a-entity>
     <a-entity light="type: directional; color: #ffffff; intensity: 0.8;" position="0 50 0"></a-entity>
 
-    <!-- 典雅木質色調地板（修正相依問題，確保流暢載入） -->
+    <!-- 典雅木質色調地板 -->
     <a-plane id="ground" class="clickable" position="0 0 0" rotation="-90 0 0" width="160" height="160" color="#784d33" material="roughness: 0.4;"></a-plane>
 
     <!-- 天花板 -->
@@ -285,7 +285,7 @@
     <!-- 動態展位容器 -->
     <a-entity id="gallery-slots"></a-entity>
 
-    <!-- 玩家視角系統（中央區域 0 1.6 30，由遠到近欣賞展覽，絕不貼牆） -->
+    <!-- 玩家視角系統 -->
     <a-entity id="rig" position="0 1.6 30">
       <a-entity id="player" camera look-controls="pointerLockEnabled: false" wasd-controls="acceleration: 60; fly: false;">
       </a-entity>
@@ -295,7 +295,6 @@
   </a-scene>
 
   <script>
-    // 1. 狀態管理
     let currentUser = JSON.parse(localStorage.getItem('YOUTH_GALLERY_USER') || 'null');
     const galleryStore = JSON.parse(localStorage.getItem('YOUTH_GALLERY_STORE') || '{}');
     let activeWishes = JSON.parse(localStorage.getItem('YOUTH_ACTIVE_WISHES') || '[]');
@@ -305,6 +304,10 @@
 
     function enterGallery() {
       document.getElementById('welcome-overlay').style.display = 'none';
+      
+      // 強制觸發視窗重整，確保 A-Frame 畫布正確計算尺寸並渲染畫面
+      window.dispatchEvent(new Event('resize'));
+
       const audio = document.getElementById('bgm-1');
       if (audio) {
         audio.volume = 0.4;
@@ -335,7 +338,6 @@
       }
     }
 
-    // 2. 嚴格防穿透碰撞檢測
     const innerWallObstacles = [
       { minX: -37, maxX: -33, minZ: -45, maxZ: -15 },
       { minX: 33, maxX: 37, minZ: -45, maxZ: -15 },
@@ -377,7 +379,6 @@
       }, 30);
     }
 
-    // 3. 展位生成
     const SLOT_DEFINITIONS = [];
     function generateSlotDefinitions() {
       let slotIdx = 1;
@@ -406,6 +407,7 @@
 
     function initGallerySlots() {
       const container = document.getElementById('gallery-slots');
+      if (!container) return;
       container.innerHTML = '';
 
       SLOT_DEFINITIONS.forEach(slot => {
@@ -484,7 +486,6 @@
       });
     }
 
-    // 4. 登入與上傳
     function openLoginModal() { openModal('login-modal'); }
 
     function submitLogin() {
@@ -567,7 +568,6 @@
       reader.readAsDataURL(fileInput.files[0]);
     }
 
-    // 5. 互動留言與煙火
     function openInteractiveModal() {
       const nameInput = document.getElementById('int-name');
       if (currentUser && !nameInput.value) nameInput.value = currentUser.name;
@@ -670,7 +670,6 @@
       }
     }
 
-    // 6. 作品彈窗與管理
     function openArtModal(slotId) {
       currentActiveArt = galleryStore[slotId];
       if (!currentActiveArt) return;
