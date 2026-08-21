@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>青年百億圓夢基金計劃照片展 - PhotoVogue 沉浸展廳</title>
+  <title>青年百億圓夢計劃 - PhotoVogue 沉浸式高畫質藝廊</title>
 
   <!-- A-Frame 3D 引擎與連線套件 -->
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
@@ -13,179 +13,182 @@
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; overflow: hidden; background: #0b0f19; }
 
-    /* 強制隱藏 A-Frame 中央圓點 */
+    /* 隱藏預設游標 */
     .a-canvas { cursor: default !important; }
-    .a-cursor-ring, .a-mouse-cursor-inner, a-cursor {
-      display: none !important;
-      opacity: 0 !important;
-      visibility: hidden !important;
-    }
+    .a-cursor-ring, .a-mouse-cursor-inner, a-cursor { display: none !important; opacity: 0 !important; visibility: hidden !important; }
 
     /* 入場沉浸式遮罩 */
     #welcome-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(20px);
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      text-align: center;
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(11, 15, 25, 0.96); backdrop-filter: blur(20px); z-index: 9999;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center;
     }
-    #welcome-overlay h1 { font-size: 28px; font-weight: 300; letter-spacing: 3px; margin-bottom: 12px; }
-    #welcome-overlay p { font-size: 14px; color: #94a3b8; margin-bottom: 28px; }
+    #welcome-overlay h1 { font-size: 28px; font-weight: 300; letter-spacing: 3px; margin-bottom: 8px; }
+    #welcome-overlay p { font-size: 14px; color: #94a3b8; margin-bottom: 24px; }
     .btn-enter {
-      background: #ffffff;
-      color: #0f172a;
-      border: none;
-      padding: 12px 36px;
-      border-radius: 30px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
+      background: #ffffff; color: #0f172a; border: none; padding: 12px 36px; border-radius: 30px;
+      font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
     }
     .btn-enter:hover { transform: scale(1.05); background: #f1f5f9; }
 
-    /* 頂部極簡導覽列 */
+    /* 頂部導覽列 */
     #navbar {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 999;
-      background: rgba(15, 23, 42, 0.8);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 10px 24px;
-      border-radius: 40px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
-      color: white;
+      position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999;
+      background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 10px 24px; border-radius: 40px; display: flex; align-items: center; gap: 16px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    #exhibition-title { font-size: 15px; font-weight: 500; letter-spacing: 1.5px; }
+    #exhibition-title { font-size: 14px; font-weight: 500; letter-spacing: 1px; }
 
-    /* 右上角音樂控制按鈕 */
-    #music-control {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      z-index: 999;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: white;
-      padding: 10px 16px;
-      border-radius: 30px;
-      cursor: pointer;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white;
+      padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+    }
+    .nav-btn:hover { background: rgba(255, 255, 255, 0.25); }
+
+    /* 音樂與身分狀態標籤 */
+    #user-badge { font-size: 12px; color: #38bdf8; font-weight: 600; }
+
+    /* 通用 Modal 彈窗樣式 */
+    .modal-panel {
+      display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;
+      background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(16px); padding: 24px; border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4); width: 440px; max-width: 90vw; max-height: 85vh; overflow-y: auto;
+    }
+    .modal-panel h3 { margin: 0 0 12px 0; color: #0f172a; font-size: 20px; }
+    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; }
+
+    /* 表單輸入 */
+    .form-group { margin-bottom: 12px; text-align: left; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px; }
+    .form-group input, .form-group textarea {
+      width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;
     }
 
-    /* 作品點擊詳細互動視窗 */
-    #art-modal {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(16px);
-      padding: 24px;
-      border-radius: 20px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
-      width: 420px;
-      max-width: 90vw;
-      max-height: 85vh;
-      overflow-y: auto;
-    }
-    #art-modal h3 { margin: 0 0 4px 0; color: #0f172a; font-size: 20px; }
-    #art-modal .project-no { font-size: 12px; color: #2563eb; font-weight: 600; margin-bottom: 2px; }
+    /* 作品詳細點擊彈窗 */
+    #art-modal .project-no { font-size: 12px; color: #2563eb; font-weight: 700; margin-bottom: 2px; }
     #art-modal .author { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 12px; }
     #art-modal .desc { font-size: 14px; color: #334155; line-height: 1.6; margin-bottom: 16px; }
 
-    /* 全螢幕大圖放大檢視 Modal */
     .image-preview-container { width: 100%; text-align: center; margin-bottom: 12px; }
     .image-preview-container img {
       max-width: 100%; max-height: 300px; border-radius: 12px; object-fit: contain; cursor: zoom-in;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s;
     }
     .image-preview-container img:hover { transform: scale(1.02); }
-    .zoom-hint { font-size: 11px; color: #64748b; margin-top: 4px; }
 
-    .like-section { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
-    .like-btn {
-      background: #fff0f6; color: #e11d48; border: 1px solid #fecdd3; padding: 6px 14px; border-radius: 16px; cursor: pointer; font-weight: 600;
-    }
-    .like-btn:disabled { background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed; }
+    .btn-danger { background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 12px; margin-top: 10px; width: 100%; }
+    .btn-danger:hover { background: #dc2626; }
 
-    .comments-section { border-top: 1px solid #e2e8f0; padding-top: 12px; }
+    /* 觀看留言區 */
+    .comments-section { border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 12px; }
     .comments-title { font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 8px; }
-    .comments-list { max-height: 120px; overflow-y: auto; font-size: 13px; color: #334155; margin-bottom: 8px; }
+    .comments-list { max-height: 100px; overflow-y: auto; font-size: 13px; color: #334155; margin-bottom: 8px; }
     .comment-item { background: #f8fafc; padding: 6px 10px; border-radius: 8px; margin-bottom: 4px; }
     .comment-input-group { display: flex; gap: 6px; }
-    .comment-input-group input { flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
-    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; }
+    .comment-input-group input { flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; }
 
-    /* 全螢幕燈箱 */
+    /* 全螢幕大圖燈箱 */
     #full-lightbox {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.92); z-index: 2000; justify-content: center; align-items: center; flex-direction: column;
+      background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center;
     }
-    #full-lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 8px; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
-    #full-lightbox .close-lightbox { position: absolute; top: 20px; right: 30px; color: white; font-size: 32px; cursor: pointer; }
+    #full-lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 8px; box-shadow: 0 0 40px rgba(255,255,255,0.2); object-fit: contain; }
+    #full-lightbox .close-lightbox { position: absolute; top: 20px; right: 30px; color: white; font-size: 36px; cursor: pointer; }
+
+    /* 後台紀錄視窗 (Admin Dashboard) */
+    #admin-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px; }
+    #admin-table th, #admin-table td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }
+    #admin-table th { background: #f1f5f9; color: #334155; }
   </style>
 </head>
 <body>
 
   <!-- 入場沉浸體驗遮罩 -->
   <div id="welcome-overlay">
-    <h1>青年百億圓夢基金計劃區</h1>
-    <p>PhotoVogue 風格沉浸式影像藝術展</p>
-    <button class="btn-enter" onclick="enterGallery()">開啟音訊並進入展廳</button>
+    <h1>青年百億圓夢計劃 成果展</h1>
+    <p>PhotoVogue 沉浸式 3D 展廳 ｜ 無聲光干擾藝術空間</p>
+    <button class="btn-enter" onclick="enterGallery()">進入展廳與開啟音樂</button>
   </div>
 
   <!-- 頂部導覽列 -->
   <div id="navbar">
-    <div id="exhibition-title">✨ 青年百億圓夢基金計劃照片展</div>
+    <div id="exhibition-title">✨ PhotoVogue 展區</div>
+    <div id="user-badge">👤 觀賞者（未登入）</div>
+    <button class="nav-btn" id="login-nav-btn" onclick="openLoginModal()">策展人登入</button>
+    <button class="nav-btn" onclick="toggleMusic()" id="music-btn">🎵 音樂：播放中</button>
+    <button class="nav-btn" onclick="openAdminModal()">📊 後台紀錄</button>
   </div>
 
-  <!-- 音樂控制按鈕 -->
-  <button id="music-control" onclick="toggleMusic()">🎵 背景音樂：播放中</button>
+  <!-- 1. 策展人登入 Modal -->
+  <div id="login-modal" class="modal-panel">
+    <button class="modal-close" onclick="closeModal('login-modal')">✕</button>
+    <h3>策展人登入驗證</h3>
+    <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">請建立策展資料以獲得作品上傳與個人管理權限（每人限上傳 3 張作品）。</p>
+    <div class="form-group"><label>策展人姓名 *</label><input type="text" id="reg-name" placeholder="請輸入姓名"></div>
+    <div class="form-group"><label>參加計畫名稱 *</label><input type="text" id="reg-program" placeholder="例如：青年百億圓夢計畫"></div>
+    <div class="form-group"><label>梯次 *</label><input type="text" id="reg-batch" placeholder="例如：2026 第一期"></div>
+    <div class="form-group"><label>計畫代號 *</label><input type="text" id="reg-code" placeholder="例如：PROJ-2026-A1"></div>
+    <button class="btn-enter" style="width: 100%; border-radius: 12px; margin-top: 10px; background: #0f172a; color: white;" onclick="submitLogin()">完成認證並登入</button>
+  </div>
 
-  <!-- 作品彈窗 -->
-  <div id="art-modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="project-no" id="modal-project-no">案號：PROJ-2026-001</div>
-    <h3 id="modal-title">作品標題</h3>
+  <!-- 2. 上傳作品 Modal -->
+  <div id="upload-modal" class="modal-panel">
+    <button class="modal-close" onclick="closeModal('upload-modal')">✕</button>
+    <h3>上傳策展作品</h3>
+    <div class="form-group"><label>作品名稱 *</label><input type="text" id="up-title" placeholder="請輸入作品名稱"></div>
+    <div class="form-group"><label>作品簡述</label><textarea id="up-desc" rows="3" placeholder="簡述這張照片背後的故事..."></textarea></div>
+    <div class="form-group"><label>選擇照片原圖 (不強制裁切) *</label><input type="file" id="up-file" accept="image/*"></div>
+    <button class="btn-enter" style="width: 100%; border-radius: 12px; margin-top: 10px; background: #2563eb; color: white;" onclick="confirmUpload()">發布至指定展位</button>
+  </div>
+
+  <!-- 3. 作品詳細內容 Modal -->
+  <div id="art-modal" class="modal-panel">
+    <button class="modal-close" onclick="closeModal('art-modal')">✕</button>
+    <div class="project-no" id="modal-project-no">計畫代號：PROJ-2026-A1 (梯次)</div>
+    <h3 id="modal-title" style="margin-top: 4px;">作品名稱</h3>
     <div class="author" id="modal-author">創作者名單</div>
     
     <div class="image-preview-container">
       <img id="modal-img-preview" src="" alt="作品原圖" onclick="openLightbox()">
-      <div class="zoom-hint">🔍 點擊圖片可全螢幕高清放大檢視</div>
+      <div style="font-size: 11px; color: #64748b; margin-top: 4px;">🔍 點擊圖片開啟高清原圖檢視</div>
     </div>
 
     <div class="desc" id="modal-desc">作品介紹...</div>
-
-    <div class="like-section">
-      <button class="like-btn" id="like-button" onclick="addLike()">❤️ <span id="modal-like-count">0</span> 人喜愛</button>
-    </div>
 
     <div class="comments-section">
       <div class="comments-title">💬 觀展留言</div>
       <div class="comments-list" id="modal-comments-list"></div>
       <div class="comment-input-group">
         <input type="text" id="comment-input" placeholder="寫下你的心得..." onkeydown="if(event.key==='Enter') submitComment()">
-        <button class="like-btn" style="background:#3b82f6; color:white; border:none;" onclick="submitComment()">送出</button>
+        <button class="nav-btn" style="background:#2563eb;" onclick="submitComment()">送出</button>
       </div>
+    </div>
+
+    <!-- 擁有者專用刪除按鈕 -->
+    <div id="owner-delete-container" style="display: none;">
+      <button class="btn-danger" onclick="deleteCurrentArt()">🗑️ 刪除此作品（僅限本人操作）</button>
+    </div>
+  </div>
+
+  <!-- 4. 後台紀錄 Modal (Admin Dashboard) -->
+  <div id="admin-modal" class="modal-panel" style="width: 600px;">
+    <button class="modal-close" onclick="closeModal('admin-modal')">✕</button>
+    <h3>📊 展覽後台數據紀錄</h3>
+    <div style="max-height: 350px; overflow-y: auto;">
+      <table id="admin-table">
+        <thead>
+          <tr>
+            <th>策展人</th>
+            <th>計畫 / 梯次</th>
+            <th>代號</th>
+            <th>作品名稱</th>
+            <th>展位號碼</th>
+          </tr>
+        </thead>
+        <tbody id="admin-table-body">
+          <!-- 動態載入後台數據 -->
+        </tbody>
+      </table>
     </div>
   </div>
 
@@ -195,8 +198,9 @@
     <img id="lightbox-img" src="" alt="高解析原圖">
   </div>
 
-  <!-- 3D 展覽場景 (PhotoVogue 風格) -->
-  <a-scene networked-scene="room: photovogue-gallery-v1; debug: true; adapter: wseasyrtc;" raycaster="objects: .clickable">
+  <!-- 3D 展覽場景 (50+ 照片專屬大型 PhotoVogue 藝廊) -->
+  <a-scene networked-scene="room: photovogue-grand-gallery-v3; debug: true; adapter: wseasyrtc;" raycaster="objects: .clickable">
+    
     <a-assets>
       <template id="avatar-template">
         <a-entity class="avatar">
@@ -204,41 +208,41 @@
         </a-entity>
       </template>
 
-      <!-- 無版權優雅古典樂 (自動輪播) -->
+      <!-- 多首無版權優雅純音樂 (無人聲輪播) -->
       <audio id="bgm-1" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=soft-piano-100-bpm-121529.mp3" preload="auto"></audio>
       <audio id="bgm-2" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a7315b.mp3?filename=relaxing-piano-10267.mp3" preload="auto"></audio>
+      <audio id="bgm-3" src="https://cdn.pixabay.com/download/audio/2022/11/06/audio_c1871a3915.mp3?filename=gentle-piano-ambient-126241.mp3" preload="auto"></audio>
     </a-assets>
 
-    <!-- 柔和暖色天花板與天空 -->
-    <a-sky color="#f5f2eb"></a-sky>
+    <!-- 展廳天空與照明 -->
+    <a-sky color="#0d1117"></a-sky>
 
-    <!-- 1. 溫潤木質拼花地板 (PhotoVogue 經典質感) -->
-    <a-plane position="0 0 0" rotation="-90 0 0" width="24" height="24" color="#d4b595" material="roughness: 0.3; metalness: 0.05"></a-plane>
+    <!-- 木質高級地板 (40m x 40m 大型藝廊) -->
+    <a-plane position="0 0 0" rotation="-90 0 0" width="44" height="44" color="#a37e58" material="roughness: 0.25; metalness: 0.1"></a-plane>
     <!-- 天花板 -->
-    <a-plane position="0 6 0" rotation="90 0 0" width="24" height="24" color="#eae5d9"></a-plane>
+    <a-plane position="0 8 0" rotation="90 0 0" width="44" height="44" color="#111827"></a-plane>
 
-    <!-- 2. 周圍暖白展牆 -->
-    <a-plane position="0 3 -10" width="20" height="6" color="#fcfbf7"></a-plane>
-    <a-plane position="0 3 10" rotation="0 180 0" width="20" height="6" color="#fcfbf7"></a-plane>
-    <a-plane position="-10 3 0" rotation="0 90 0" width="20" height="6" color="#fcfbf7"></a-plane>
-    <a-plane position="10 3 0" rotation="0 -90 0" width="20" height="6" color="#fcfbf7"></a-plane>
+    <!-- 外圍四周展牆 -->
+    <a-plane position="0 4 -20" width="40" height="8" color="#f8fafc"></a-plane>
+    <a-plane position="0 4 20" rotation="0 180 0" width="40" height="8" color="#f8fafc"></a-plane>
+    <a-plane position="-20 4 0" rotation="0 90 0" width="40" height="8" color="#f8fafc"></a-plane>
+    <a-plane position="20 4 0" rotation="0 -90 0" width="40" height="8" color="#f8fafc"></a-plane>
 
-    <!-- 3. 中央 PhotoVogue 經典黑色金屬旋轉屏風 -->
-    <a-box position="-2.5 3 -2" rotation="0 15 0" width="0.1" height="5" depth="2.8" color="#111827"></a-box>
-    <a-box position="0.5 3 -1" rotation="0 -20 0" width="0.1" height="5" depth="2.8" color="#111827"></a-box>
-    <a-box position="3.5 3 -2.5" rotation="0 10 0" width="0.1" height="5" depth="2.8" color="#111827"></a-box>
+    <!-- 中央經典 PhotoVogue 旋轉雙面屏風牆 (不可穿透，只能正面觀賞) -->
+    <!-- 中央屏風 A -->
+    <a-box class="obstacle" position="-8 4 -6" rotation="0 20 0" width="0.2" height="7" depth="12" color="#0f172a"></a-box>
+    <!-- 中央屏風 B -->
+    <a-box class="obstacle" position="8 4 -6" rotation="0 -20 0" width="0.2" height="7" depth="12" color="#0f172a"></a-box>
+    <!-- 中央屏風 C -->
+    <a-box class="obstacle" position="-8 4 8" rotation="0 -15 0" width="0.2" height="7" depth="12" color="#0f172a"></a-box>
+    <!-- 中央屏風 D -->
+    <a-box class="obstacle" position="8 4 8" rotation="0 15 0" width="0.2" height="7" depth="12" color="#0f172a"></a-box>
 
-    <!-- 4. 頂部黑色金屬軌道燈系統 -->
-    <a-cylinder position="0 5.6 -2" rotation="0 0 90" radius="0.04" height="14" color="#1e293b"></a-cylinder>
-    <a-spotlight position="-3 5.4 -2" rotation="-45 0 0" color="#fff7ed" intensity="0.8"></a-spotlight>
-    <a-spotlight position="0 5.4 -2" rotation="-45 0 0" color="#fff7ed" intensity="0.8"></a-spotlight>
-    <a-spotlight position="3 5.4 -2" rotation="-45 0 0" color="#fff7ed" intensity="0.8"></a-spotlight>
-
-    <!-- 動態展位與展品容器 -->
+    <!-- 動態展位與燈光容器 -->
     <a-entity id="gallery-slots"></a-entity>
 
-    <!-- 玩家視角與移動 -->
-    <a-entity id="rig" movement-controls position="0 1.6 4">
+    <!-- 玩家視角與移動（設有移動範圍限制） -->
+    <a-entity id="rig" movement-controls position="0 1.6 15">
       <a-entity id="player" camera look-controls="pointerLockEnabled: false" wasd-controls>
       </a-entity>
     </a-entity>
@@ -247,14 +251,21 @@
   </a-scene>
 
   <script>
-    // 無版權優雅樂曲播放清單
-    const playlist = ['bgm-1', 'bgm-2'];
+    // 1. 全域狀態管理與持久化儲存
+    let currentUser = JSON.parse(localStorage.getItem('YOUTH_GALLERY_USER') || 'null');
+    const galleryStore = JSON.parse(localStorage.getItem('YOUTH_GALLERY_STORE') || '{}');
+    let selectedSlotForUpload = null;
+    let currentActiveArt = null;
+
+    // 2. 音樂播放器 (多首無人聲優雅鋼琴樂輪播)
+    const playlist = ['bgm-1', 'bgm-2', 'bgm-3'];
     let currentTrack = 0;
     let isPlaying = false;
 
     function enterGallery() {
       document.getElementById('welcome-overlay').style.display = 'none';
       playBGM();
+      updateUserUI();
     }
 
     function playBGM() {
@@ -262,8 +273,8 @@
       if (audio) {
         audio.play().then(() => {
           isPlaying = true;
-          document.getElementById('music-control').textContent = '🎵 背景音樂：播放中';
-        }).catch(err => console.log("Audio play error:", err));
+          document.getElementById('music-btn').textContent = '🎵 音樂：播放中';
+        }).catch(err => console.log("Music play blocked:", err));
 
         audio.onended = () => {
           currentTrack = (currentTrack + 1) % playlist.length;
@@ -275,42 +286,60 @@
     function toggleMusic() {
       const audio = document.getElementById(playlist[currentTrack]);
       if (!audio) return;
-
       if (isPlaying) {
-        audio.pause();
-        isPlaying = false;
-        document.getElementById('music-control').textContent = '🔇 背景音樂：已靜音';
+        audio.pause(); isPlaying = false;
+        document.getElementById('music-btn').textContent = '🔇 音樂：已靜音';
       } else {
-        audio.play();
-        isPlaying = true;
-        document.getElementById('music-control').textContent = '🎵 背景音樂：播放中';
+        audio.play(); isPlaying = true;
+        document.getElementById('music-btn').textContent = '🎵 音樂：播放中';
       }
     }
 
-    // 展位定義（含中央 PhotoVogue 屏風展位）
-    const SLOT_DEFINITIONS = [
-      // 中央黑色金屬屏風展位
-      { id: 'slot_1', pos: '-2.44 3 -2', rot: '0 105 0' },
-      { id: 'slot_2', pos: '0.56 3 -1', rot: '0 70 0' },
-      { id: 'slot_3', pos: '3.56 3 -2.5', rot: '0 100 0' },
-      // 後方大牆展位 (North)
-      { id: 'slot_4', pos: '-6 3 -9.8', rot: '0 0 0' },
-      { id: 'slot_5', pos: '0 3 -9.8', rot: '0 0 0' },
-      { id: 'slot_6', pos: '6 3 -9.8', rot: '0 0 0' },
-      // 右牆 (East)
-      { id: 'slot_7', pos: '9.8 3 -3', rot: '0 -90 0' },
-      { id: 'slot_8', pos: '9.8 3 3', rot: '0 -90 0' },
-      // 左牆 (West)
-      { id: 'slot_9', pos: '-9.8 3 -3', rot: '0 90 0' },
-      { id: 'slot_10', pos: '-9.8 3 3', rot: '0 90 0' }
-    ];
+    // 3. 自動生成 52 個展位座標 (包含四周牆面與中央雙面屏風，均為正面視角)
+    const SLOT_DEFINITIONS = [];
 
-    let currentArtData = null;
-    const galleryStore = JSON.parse(localStorage.getItem('YOUTH_DREAM_GALLERY_STORE') || '{}');
-    const likedArts = new Set();
+    function generateSlotDefinitions() {
+      let slotIdx = 1;
 
+      // 外圍 North 牆 (10 個展位)
+      for (let x = -18; x <= 18; x += 4) {
+        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `${x} 4 -19.8`, rot: '0 0 0' });
+      }
+      // 外圍 South 牆 (10 個展位)
+      for (let x = -18; x <= 18; x += 4) {
+        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `${x} 4 19.8`, rot: '0 180 0' });
+      }
+      // 外圍 West 牆 (10 個展位)
+      for (let z = -18; z <= 18; z += 4) {
+        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `-19.8 4 ${z}`, rot: '0 90 0' });
+      }
+      // 外圍 East 牆 (10 個展位)
+      for (let z = -18; z <= 18; z += 4) {
+        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `19.8 4 ${z}`, rot: '0 -90 0' });
+      }
+
+      // 中央屏風牆雙面正面展位 (12 個展位)
+      const screens = [
+        { pos: '-8 4 -6', rot: 20 },
+        { pos: '8 4 -6', rot: -20 },
+        { pos: '-8 4 8', rot: -15 },
+        { pos: '8 4 8', rot: 15 }
+      ];
+
+      screens.forEach((s) => {
+        // 正面 A
+        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `${parseFloat(s.pos.split(' ')[0]) + 0.15} 4 ${s.pos.split(' ')[2]}`, rot: `0 ${s.rot + 90} 0` });
+        // 反面 B
+        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `${parseFloat(s.pos.split(' ')[0]) - 0.15} 4 ${s.pos.split(' ')[2]}`, rot: `0 ${s.rot - 90} 0` });
+      });
+    }
+
+    generateSlotDefinitions();
+
+    // 4. 初始化與渲染 3D 展位
     window.addEventListener('load', () => {
       initGallerySlots();
+      updateUserUI();
     });
 
     function initGallerySlots() {
@@ -324,6 +353,16 @@
 
         const occupiedData = galleryStore[slot.id];
 
+        // 為「每個展位」上方設定專屬 Spotlight 聚光燈打燈
+        const spotlight = document.createElement('a-spotlight');
+        spotlight.setAttribute('position', '0 2.2 1.2');
+        spotlight.setAttribute('rotation', '-35 0 0');
+        spotlight.setAttribute('color', '#fff8ee');
+        spotlight.setAttribute('intensity', '1.2');
+        spotlight.setAttribute('distance', '6');
+        spotlight.setAttribute('angle', '45');
+        slotGroup.appendChild(spotlight);
+
         if (occupiedData) {
           renderArtSlot(slotGroup, occupiedData, slot.id);
         } else {
@@ -334,104 +373,63 @@
       });
     }
 
+    // 渲染未上傳展位
     function renderEmptySlot(group, slotId) {
       const emptyBox = document.createElement('a-plane');
-      emptyBox.setAttribute('color', '#94a3b8');
-      emptyBox.setAttribute('width', '2.8');
-      emptyBox.setAttribute('height', '2.0');
-      emptyBox.setAttribute('material', 'side: double; opacity: 0.3; transparent: true;');
+      emptyBox.setAttribute('color', '#64748b');
+      emptyBox.setAttribute('width', '2.2');
+      emptyBox.setAttribute('height', '1.6');
+      emptyBox.setAttribute('material', 'side: double; opacity: 0.25; transparent: true;');
       emptyBox.setAttribute('class', 'clickable');
 
       const text = document.createElement('a-text');
-      text.setAttribute('value', '＋ 點擊此展位策展上傳');
+      text.setAttribute('value', '＋ 點擊策展上傳');
       text.setAttribute('align', 'center');
-      text.setAttribute('color', '#1e293b');
-      text.setAttribute('width', '3.5');
+      text.setAttribute('color', '#f8fafc');
+      text.setAttribute('width', '3');
       text.setAttribute('position', '0 0 0.02');
 
       emptyBox.appendChild(text);
 
       emptyBox.addEventListener('click', () => {
-        uploadToSlot(slotId);
+        handleSlotClickForUpload(slotId);
       });
 
       group.appendChild(emptyBox);
     }
 
-    function uploadToSlot(slotId) {
-      if (galleryStore[slotId]) {
-        alert('這個展位已經被其它參展者使用了！請選擇別的展位。');
-        return;
-      }
-
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const projectNo = prompt("請輸入計畫案號：", "PROJ-2026-0" + slotId.split('_')[1]) || "PROJ-2026-001";
-        const title = prompt("請輸入作品名稱：", "記憶的隙縫") || "無題";
-        const author = prompt("請輸入創作者姓名：", "陳玟嬡") || "匿名";
-        const desc = prompt("請輸入作品簡介：", "青年百億圓夢基金計劃實踐成果。") || "暫無簡介。";
-
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          const artData = {
-            id: slotId,
-            projectNo,
-            url: evt.target.result,
-            title,
-            author,
-            desc,
-            likes: 0,
-            comments: []
-          };
-
-          galleryStore[slotId] = artData;
-          localStorage.setItem('YOUTH_DREAM_GALLERY_STORE', JSON.stringify(galleryStore));
-          initGallerySlots();
-
-          if (NAF.connection.isConnected()) {
-            NAF.connection.broadcastData('new-image-slot', artData);
-          }
-        };
-        reader.readAsDataURL(file);
-      };
-      input.click();
-    }
-
+    // 渲染已上傳作品 (高質感名牌、不壓縮圖片原比例)
     function renderArtSlot(group, data, slotId) {
-      // 1. PhotoVogue 極簡極細黑金屬框
+      // 1. PhotoVogue 極簡黑色金屬底框
       const frame = document.createElement('a-box');
       frame.setAttribute('color', '#0f172a');
-      frame.setAttribute('width', '2.9');
-      frame.setAttribute('height', '2.1');
-      frame.setAttribute('depth', '0.04');
-      frame.setAttribute('position', '0 0 -0.02');
+      frame.setAttribute('width', (data.aspectWidth || 2.4).toString());
+      frame.setAttribute('height', (data.aspectHeight || 1.8).toString());
+      frame.setAttribute('depth', '0.03');
+      frame.setAttribute('position', '0 0 -0.015');
 
-      // 2. 高解析度照片本體
+      // 2. 相片本體（保持原始長寬比例不壓縮）
       const img = document.createElement('a-image');
       img.setAttribute('src', data.url);
-      img.setAttribute('width', '2.8');
-      img.setAttribute('height', '2.0');
+      img.setAttribute('width', (data.aspectWidth || 2.3).toString());
+      img.setAttribute('height', (data.aspectHeight || 1.7).toString());
       img.setAttribute('position', '0 0 0.01');
       img.setAttribute('class', 'clickable');
       img.setAttribute('material', 'npot: true; anisotropy: 16; mipmaps: true;');
 
-      // 3. 極簡名牌
+      // 3. 正下方實體名牌 (計畫代號、作品名稱、上傳者名稱)
+      const plateY = -((data.aspectHeight || 1.8) / 2) - 0.45;
       const plate = document.createElement('a-plane');
       plate.setAttribute('color', '#0f172a');
       plate.setAttribute('width', '2.4');
-      plate.setAttribute('height', '0.7');
-      plate.setAttribute('position', '0 -1.5 0.01');
+      plate.setAttribute('height', '0.65');
+      plate.setAttribute('position', `0 ${plateY} 0.01`);
 
       const plateText = document.createElement('a-text');
-      plateText.setAttribute('value', `${data.projectNo}\n${data.title}\n${data.author}`);
+      plateText.setAttribute('value', `代號：${data.user.code}\n${data.title}\n創作者：${data.user.name}`);
       plateText.setAttribute('align', 'center');
       plateText.setAttribute('color', '#f8fafc');
-      plateText.setAttribute('width', '3.5');
+      plateText.setAttribute('width', '3.2');
       plateText.setAttribute('position', '0 0 0.01');
       plate.appendChild(plateText);
 
@@ -439,81 +437,198 @@
       group.appendChild(img);
       group.appendChild(plate);
 
-      img.addEventListener('click', function () {
-        openModal(slotId);
+      img.addEventListener('click', () => {
+        openArtModal(slotId);
       });
     }
 
-    function openModal(slotId) {
-      currentArtData = galleryStore[slotId];
-      if (!currentArtData) return;
+    // 5. 使用者權限與登入邏輯
+    function openLoginModal() { openModal('login-modal'); }
 
-      document.getElementById('modal-project-no').textContent = `計畫案號：${currentArtData.projectNo || '未填寫'}`;
-      document.getElementById('modal-title').textContent = currentArtData.title;
-      document.getElementById('modal-author').textContent = currentArtData.author;
-      document.getElementById('modal-desc').textContent = currentArtData.desc;
-      document.getElementById('modal-img-preview').src = currentArtData.url;
-      document.getElementById('modal-like-count').textContent = currentArtData.likes || 0;
+    function submitLogin() {
+      const name = document.getElementById('reg-name').value.trim();
+      const program = document.getElementById('reg-program').value.trim();
+      const batch = document.getElementById('reg-batch').value.trim();
+      const code = document.getElementById('reg-code').value.trim();
 
-      const likeBtn = document.getElementById('like-button');
-      if (likedArts.has(slotId)) {
-        likeBtn.disabled = true;
-        likeBtn.innerHTML = `❤️ <span id="modal-like-count">${currentArtData.likes || 0}</span> 人喜愛（已按讚）`;
+      if (!name || !program || !batch || !code) {
+        alert('請填寫所有標有 * 的必填欄位！');
+        return;
+      }
+
+      currentUser = { id: 'usr_' + Date.now(), name, program, batch, code };
+      localStorage.setItem('YOUTH_GALLERY_USER', JSON.stringify(currentUser));
+      updateUserUI();
+      closeModal('login-modal');
+      alert(`歡迎登入，${name} 策展人！您現在可以選擇展位並最多上傳 3 張作品。`);
+    }
+
+    function updateUserUI() {
+      const badge = document.getElementById('user-badge');
+      const btn = document.getElementById('login-nav-btn');
+      if (currentUser) {
+        const userUploadCount = getUserUploadCount(currentUser.id);
+        badge.textContent = `👤 策展人：${currentUser.name} (已上傳 ${userUploadCount}/3)`;
+        btn.textContent = '切換 / 編輯身分';
       } else {
-        likeBtn.disabled = false;
-        likeBtn.innerHTML = `❤️ <span id="modal-like-count">${currentArtData.likes || 0}</span> 人喜愛`;
+        badge.textContent = '👤 觀賞者（未登入）';
+        btn.textContent = '策展人登入';
+      }
+    }
+
+    function getUserUploadCount(userId) {
+      let count = 0;
+      Object.values(galleryStore).forEach(item => {
+        if (item.user && item.user.id === userId) count++;
+      });
+      return count;
+    }
+
+    // 6. 點擊展位與上傳圖片控制 (保持原圖比例)
+    function handleSlotClickForUpload(slotId) {
+      if (!currentUser) {
+        alert('觀賞者無法直接上傳作品！請先點擊頂部「策展人登入」建立基本資料。');
+        openLoginModal();
+        return;
+      }
+
+      if (getUserUploadCount(currentUser.id) >= 3) {
+        alert('每位登入的策展人最多只能上傳 3 張作品！');
+        return;
+      }
+
+      if (galleryStore[slotId]) {
+        alert('這個展位已經被其它參展者使用了！請選擇其他空白展位。');
+        return;
+      }
+
+      selectedSlotForUpload = slotId;
+      openModal('upload-modal');
+    }
+
+    function confirmUpload() {
+      const title = document.getElementById('up-title').value.trim();
+      const desc = document.getElementById('up-desc').value.trim();
+      const fileInput = document.getElementById('up-file');
+
+      if (!title || fileInput.files.length === 0) {
+        alert('請填寫作品名稱並選擇作品圖片！');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = function() {
+          // 計算原圖真實比例，避免壓縮变形
+          let aspectWidth = 2.4;
+          let aspectHeight = 2.4 * (img.height / img.width);
+          if (aspectHeight > 2.8) {
+            aspectHeight = 2.8;
+            aspectWidth = 2.8 * (img.width / img.height);
+          }
+
+          const artData = {
+            id: selectedSlotForUpload,
+            title,
+            desc,
+            url: evt.target.result,
+            aspectWidth,
+            aspectHeight,
+            user: currentUser,
+            comments: [],
+            timestamp: new Date().toLocaleString()
+          };
+
+          galleryStore[selectedSlotForUpload] = artData;
+          localStorage.setItem('YOUTH_GALLERY_STORE', JSON.stringify(galleryStore));
+
+          initGallerySlots();
+          updateUserUI();
+          closeModal('upload-modal');
+
+          // 廣播給其他連線者
+          if (window.NAF && NAF.connection && NAF.connection.isConnected()) {
+            NAF.connection.broadcastData('new-art-uploaded', artData);
+          }
+        };
+        img.src = evt.target.result;
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    // 7. 作品彈窗與刪除機制（僅限本人可刪除）
+    function openArtModal(slotId) {
+      currentActiveArt = galleryStore[slotId];
+      if (!currentActiveArt) return;
+
+      document.getElementById('modal-project-no').textContent = `計畫代號：${currentActiveArt.user.code} ｜ 梯次：${currentActiveArt.user.batch}`;
+      document.getElementById('modal-title').textContent = currentActiveArt.title;
+      document.getElementById('modal-author').textContent = `創作者：${currentActiveArt.user.name} (${currentActiveArt.user.program})`;
+      document.getElementById('modal-desc').textContent = currentActiveArt.desc || '暫無作品描述。';
+      document.getElementById('modal-img-preview').src = currentActiveArt.url;
+
+      // 檢查是否為本人上傳，顯示刪除按鈕
+      const deleteContainer = document.getElementById('owner-delete-container');
+      if (currentUser && currentActiveArt.user && currentUser.id === currentActiveArt.user.id) {
+        deleteContainer.style.display = 'block';
+      } else {
+        deleteContainer.style.display = 'none';
       }
 
       updateCommentsUI();
-      document.getElementById('art-modal').style.display = 'block';
+      openModal('art-modal');
     }
 
-    function closeModal() { document.getElementById('art-modal').style.display = 'none'; }
-    function openLightbox() { if (!currentArtData) return; document.getElementById('lightbox-img').src = currentArtData.url; document.getElementById('full-lightbox').style.display = 'flex'; }
-    function closeLightbox() { document.getElementById('full-lightbox').style.display = 'none'; }
+    function deleteCurrentArt() {
+      if (!currentActiveArt) return;
+      if (!currentUser || currentActiveArt.user.id !== currentUser.id) {
+        alert('您無法刪除其他人的作品！');
+        return;
+      }
 
-    function addLike() {
-      if (!currentArtData || likedArts.has(currentArtData.id)) return;
-      likedArts.add(currentArtData.id);
-      currentArtData.likes = (currentArtData.likes || 0) + 1;
-      galleryStore[currentArtData.id] = currentArtData;
-      localStorage.setItem('YOUTH_DREAM_GALLERY_STORE', JSON.stringify(galleryStore));
+      if (confirm('確定要刪除這張上傳錯的作品嗎？刪除後展位將會釋出。')) {
+        delete galleryStore[currentActiveArt.id];
+        localStorage.setItem('YOUTH_GALLERY_STORE', JSON.stringify(galleryStore));
 
-      const likeBtn = document.getElementById('like-button');
-      likeBtn.disabled = true;
-      likeBtn.innerHTML = `❤️ <span id="modal-like-count">${currentArtData.likes}</span> 人喜愛（已按讚）`;
+        initGallerySlots();
+        updateUserUI();
+        closeModal('art-modal');
 
-      if (NAF.connection.isConnected()) {
-        NAF.connection.broadcastData('update-like', { id: currentArtData.id, likes: currentArtData.likes });
+        if (window.NAF && NAF.connection && NAF.connection.isConnected()) {
+          NAF.connection.broadcastData('art-deleted', { id: currentActiveArt.id });
+        }
       }
     }
 
+    // 8. 留言板系統
     function submitComment() {
       const input = document.getElementById('comment-input');
       const text = input.value.trim();
-      if (!text || !currentArtData) return;
+      if (!text || !currentActiveArt) return;
 
-      if (!currentArtData.comments) currentArtData.comments = [];
-      currentArtData.comments.push(text);
-      galleryStore[currentArtData.id] = currentArtData;
-      localStorage.setItem('YOUTH_DREAM_GALLERY_STORE', JSON.stringify(galleryStore));
+      const commentator = currentUser ? currentUser.name : '觀賞者';
+      if (!currentActiveArt.comments) currentActiveArt.comments = [];
+      currentActiveArt.comments.push(`${commentator}: ${text}`);
+
+      galleryStore[currentActiveArt.id] = currentActiveArt;
+      localStorage.setItem('YOUTH_GALLERY_STORE', JSON.stringify(galleryStore));
 
       updateCommentsUI();
       input.value = '';
-
-      if (NAF.connection.isConnected()) {
-        NAF.connection.broadcastData('update-comment', { id: currentArtData.id, comment: text });
-      }
     }
 
     function updateCommentsUI() {
       const list = document.getElementById('modal-comments-list');
       list.innerHTML = '';
-      if (!currentArtData.comments || currentArtData.comments.length === 0) {
-        list.innerHTML = '<div class="comment-item">尚無留言，點擊下方發言吧！</div>';
+      if (!currentActiveArt.comments || currentActiveArt.comments.length === 0) {
+        list.innerHTML = '<div class="comment-item">尚無留言，歡迎寫下感言！</div>';
         return;
       }
-      currentArtData.comments.forEach(c => {
+      currentActiveArt.comments.forEach(c => {
         const item = document.createElement('div');
         item.className = 'comment-item';
         item.textContent = c;
@@ -522,32 +637,48 @@
       list.scrollTop = list.scrollHeight;
     }
 
+    // 9. 後台紀錄數據 UI (Admin Dashboard)
+    function openAdminModal() {
+      const tbody = document.getElementById('admin-table-body');
+      tbody.innerHTML = '';
+
+      const items = Object.values(galleryStore);
+      if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">尚無任何作品上傳紀錄</td></tr>';
+      } else {
+        items.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${item.user ? item.user.name : '未知'}</td>
+            <td>${item.user ? item.user.program + ' / ' + item.user.batch : '-'}</td>
+            <td>${item.user ? item.user.code : '-'}</td>
+            <td>${item.title}</td>
+            <td>${item.id}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+      openModal('admin-modal');
+    }
+
+    // 通用 Modal 控制
+    function openModal(id) { document.getElementById(id).style.display = 'block'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function openLightbox() { if (currentActiveArt) { document.getElementById('lightbox-img').src = currentActiveArt.url; document.getElementById('full-lightbox').style.display = 'flex'; } }
+    function closeLightbox() { document.getElementById('full-lightbox').style.display = 'none'; }
+
+    // 10. Multi-user 連線廣播監聽
     document.body.addEventListener('connected', function () {
-      NAF.connection.subscribeToData('new-image-slot', (senderId, dataType, data) => {
+      NAF.connection.subscribeToData('new-art-uploaded', (senderId, dataType, data) => {
         galleryStore[data.id] = data;
-        localStorage.setItem('YOUTH_DREAM_GALLERY_STORE', JSON.stringify(galleryStore));
+        localStorage.setItem('YOUTH_GALLERY_STORE', JSON.stringify(galleryStore));
         initGallerySlots();
       });
 
-      NAF.connection.subscribeToData('update-like', (senderId, dataType, data) => {
-        if (galleryStore[data.id]) {
-          galleryStore[data.id].likes = data.likes;
-          localStorage.setItem('YOUTH_DREAM_GALLERY_STORE', JSON.stringify(galleryStore));
-          if (currentArtData && currentArtData.id === data.id) {
-            document.getElementById('modal-like-count').textContent = data.likes;
-          }
-        }
-      });
-
-      NAF.connection.subscribeToData('update-comment', (senderId, dataType, data) => {
-        if (galleryStore[data.id]) {
-          if (!galleryStore[data.id].comments) galleryStore[data.id].comments = [];
-          galleryStore[data.id].comments.push(data.comment);
-          localStorage.setItem('YOUTH_DREAM_GALLERY_STORE', JSON.stringify(galleryStore));
-          if (currentArtData && currentArtData.id === data.id) {
-            updateCommentsUI();
-          }
-        }
+      NAF.connection.subscribeToData('art-deleted', (senderId, dataType, data) => {
+        delete galleryStore[data.id];
+        localStorage.setItem('YOUTH_GALLERY_STORE', JSON.stringify(galleryStore));
+        initGallerySlots();
       });
     });
   </script>
