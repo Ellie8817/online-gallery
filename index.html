@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>青年百億圓夢基金計劃照片展</title>
+  <title>青年百億圓夢基金計劃照片展 - PhotoVogue 沉浸展廳</title>
 
   <!-- A-Frame 3D 引擎與連線套件 -->
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
@@ -11,15 +11,45 @@
   <script src="https://unpkg.com/networked-aframe@^0.8.4/dist/networked-aframe.min.js"></script>
 
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; overflow: hidden; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; overflow: hidden; background: #0b0f19; }
 
-    /* 強制隱藏 A-Frame 中央圓點與預設游標 */
+    /* 強制隱藏 A-Frame 中央圓點 */
     .a-canvas { cursor: default !important; }
     .a-cursor-ring, .a-mouse-cursor-inner, a-cursor {
       display: none !important;
       opacity: 0 !important;
       visibility: hidden !important;
     }
+
+    /* 入場沉浸式遮罩 */
+    #welcome-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
+    }
+    #welcome-overlay h1 { font-size: 28px; font-weight: 300; letter-spacing: 3px; margin-bottom: 12px; }
+    #welcome-overlay p { font-size: 14px; color: #94a3b8; margin-bottom: 28px; }
+    .btn-enter {
+      background: #ffffff;
+      color: #0f172a;
+      border: none;
+      padding: 12px 36px;
+      border-radius: 30px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
+    }
+    .btn-enter:hover { transform: scale(1.05); background: #f1f5f9; }
 
     /* 頂部極簡導覽列 */
     #navbar {
@@ -28,9 +58,9 @@
       left: 50%;
       transform: translateX(-50%);
       z-index: 999;
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 23, 42, 0.8);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       padding: 10px 24px;
       border-radius: 40px;
       display: flex;
@@ -39,21 +69,27 @@
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
       color: white;
     }
-    #exhibition-title { font-size: 16px; font-weight: 600; letter-spacing: 1px; }
-    .btn-action {
-      background: #3b82f6;
-      color: white;
-      border: none;
-      padding: 8px 18px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-    .btn-action:hover { background: #2563eb; transform: scale(1.05); }
-    #file-input { display: none; }
+    #exhibition-title { font-size: 15px; font-weight: 500; letter-spacing: 1.5px; }
 
-    /* 作品點擊詳細留言互動視窗 */
+    /* 右上角音樂控制按鈕 */
+    #music-control {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 999;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 作品點擊詳細互動視窗 */
     #art-modal {
       display: none;
       position: absolute;
@@ -66,67 +102,77 @@
       padding: 24px;
       border-radius: 20px;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
-      width: 360px;
+      width: 420px;
       max-width: 90vw;
+      max-height: 85vh;
+      overflow-y: auto;
     }
     #art-modal h3 { margin: 0 0 4px 0; color: #0f172a; font-size: 20px; }
     #art-modal .project-no { font-size: 12px; color: #2563eb; font-weight: 600; margin-bottom: 2px; }
     #art-modal .author { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 12px; }
     #art-modal .desc { font-size: 14px; color: #334155; line-height: 1.6; margin-bottom: 16px; }
 
+    /* 全螢幕大圖放大檢視 Modal */
+    .image-preview-container { width: 100%; text-align: center; margin-bottom: 12px; }
+    .image-preview-container img {
+      max-width: 100%; max-height: 300px; border-radius: 12px; object-fit: contain; cursor: zoom-in;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s;
+    }
+    .image-preview-container img:hover { transform: scale(1.02); }
+    .zoom-hint { font-size: 11px; color: #64748b; margin-top: 4px; }
+
     .like-section { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
     .like-btn {
-      background: #fff0f6;
-      color: #e11d48;
-      border: 1px solid #fecdd3;
-      padding: 6px 14px;
-      border-radius: 16px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s;
+      background: #fff0f6; color: #e11d48; border: 1px solid #fecdd3; padding: 6px 14px; border-radius: 16px; cursor: pointer; font-weight: 600;
     }
-    .like-btn:hover { background: #ffe4e6; }
-    .like-btn:disabled {
-      background: #f1f5f9;
-      color: #94a3b8;
-      border-color: #e2e8f0;
-      cursor: not-allowed;
-    }
+    .like-btn:disabled { background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed; }
 
     .comments-section { border-top: 1px solid #e2e8f0; padding-top: 12px; }
     .comments-title { font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 8px; }
-    .comments-list { max-height: 100px; overflow-y: auto; font-size: 13px; color: #334155; margin-bottom: 8px; }
+    .comments-list { max-height: 120px; overflow-y: auto; font-size: 13px; color: #334155; margin-bottom: 8px; }
     .comment-item { background: #f8fafc; padding: 6px 10px; border-radius: 8px; margin-bottom: 4px; }
     .comment-input-group { display: flex; gap: 6px; }
     .comment-input-group input { flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
-    
-    .modal-close {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: #94a3b8;
+    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; }
+
+    /* 全螢幕燈箱 */
+    #full-lightbox {
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.92); z-index: 2000; justify-content: center; align-items: center; flex-direction: column;
     }
+    #full-lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 8px; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
+    #full-lightbox .close-lightbox { position: absolute; top: 20px; right: 30px; color: white; font-size: 32px; cursor: pointer; }
   </style>
 </head>
 <body>
 
+  <!-- 入場沉浸體驗遮罩 -->
+  <div id="welcome-overlay">
+    <h1>青年百億圓夢基金計劃區</h1>
+    <p>PhotoVogue 風格沉浸式影像藝術展</p>
+    <button class="btn-enter" onclick="enterGallery()">開啟音訊並進入展廳</button>
+  </div>
+
   <!-- 頂部導覽列 -->
   <div id="navbar">
     <div id="exhibition-title">✨ 青年百億圓夢基金計劃照片展</div>
-    <button class="btn-action" onclick="document.getElementById('file-input').click()">➕ 參展 / 上傳照片</button>
-    <input type="file" id="file-input" accept="image/*" onchange="handleImageUpload(event)">
   </div>
 
-  <!-- 作品彈窗 (互動與留言) -->
+  <!-- 音樂控制按鈕 -->
+  <button id="music-control" onclick="toggleMusic()">🎵 背景音樂：播放中</button>
+
+  <!-- 作品彈窗 -->
   <div id="art-modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="project-no" id="modal-project-no">案號：PROJ-2026-001</div>
     <h3 id="modal-title">作品標題</h3>
     <div class="author" id="modal-author">創作者名單</div>
+    
+    <div class="image-preview-container">
+      <img id="modal-img-preview" src="" alt="作品原圖" onclick="openLightbox()">
+      <div class="zoom-hint">🔍 點擊圖片可全螢幕高清放大檢視</div>
+    </div>
+
     <div class="desc" id="modal-desc">作品介紹...</div>
 
     <div class="like-section">
@@ -138,31 +184,61 @@
       <div class="comments-list" id="modal-comments-list"></div>
       <div class="comment-input-group">
         <input type="text" id="comment-input" placeholder="寫下你的心得..." onkeydown="if(event.key==='Enter') submitComment()">
-        <button class="btn-action" style="padding: 6px 12px;" onclick="submitComment()">送出</button>
+        <button class="like-btn" style="background:#3b82f6; color:white; border:none;" onclick="submitComment()">送出</button>
       </div>
     </div>
   </div>
 
-  <!-- 3D 展覽場景 -->
-  <a-scene networked-scene="room: custom-hd-gallery; debug: true; adapter: wseasyrtc;" raycaster="objects: .clickable">
+  <!-- 全螢幕燈箱 -->
+  <div id="full-lightbox" onclick="closeLightbox()">
+    <span class="close-lightbox">✕</span>
+    <img id="lightbox-img" src="" alt="高解析原圖">
+  </div>
+
+  <!-- 3D 展覽場景 (PhotoVogue 風格) -->
+  <a-scene networked-scene="room: photovogue-gallery-v1; debug: true; adapter: wseasyrtc;" raycaster="objects: .clickable">
     <a-assets>
       <template id="avatar-template">
         <a-entity class="avatar">
           <a-sphere class="head" color="#60a5fa" radius="0.2" position="0 0.2 0"></a-sphere>
         </a-entity>
       </template>
+
+      <!-- 無版權優雅古典樂 (自動輪播) -->
+      <audio id="bgm-1" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=soft-piano-100-bpm-121529.mp3" preload="auto"></audio>
+      <audio id="bgm-2" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a7315b.mp3?filename=relaxing-piano-10267.mp3" preload="auto"></audio>
     </a-assets>
 
-    <!-- 高質感藝廊空間背景與地磚 -->
-    <a-sky color="#0b0f19"></a-sky>
-    <a-plane position="0 0 0" rotation="-90 0 0" width="30" height="30" color="#1e293b" material="roughness: 0.2; metalness: 0.1"></a-plane>
-    <a-plane position="0 4 -8" width="20" height="8" color="#f8fafc"></a-plane>
+    <!-- 柔和暖色天花板與天空 -->
+    <a-sky color="#f5f2eb"></a-sky>
 
-    <!-- 動態畫作容器 -->
-    <a-entity id="gallery-wall"></a-entity>
+    <!-- 1. 溫潤木質拼花地板 (PhotoVogue 經典質感) -->
+    <a-plane position="0 0 0" rotation="-90 0 0" width="24" height="24" color="#d4b595" material="roughness: 0.3; metalness: 0.05"></a-plane>
+    <!-- 天花板 -->
+    <a-plane position="0 6 0" rotation="90 0 0" width="24" height="24" color="#eae5d9"></a-plane>
 
-    <!-- 純原生滑鼠點擊，無實體 Cursor 標籤 -->
-    <a-entity id="rig" movement-controls position="0 1.6 0">
+    <!-- 2. 周圍暖白展牆 -->
+    <a-plane position="0 3 -10" width="20" height="6" color="#fcfbf7"></a-plane>
+    <a-plane position="0 3 10" rotation="0 180 0" width="20" height="6" color="#fcfbf7"></a-plane>
+    <a-plane position="-10 3 0" rotation="0 90 0" width="20" height="6" color="#fcfbf7"></a-plane>
+    <a-plane position="10 3 0" rotation="0 -90 0" width="20" height="6" color="#fcfbf7"></a-plane>
+
+    <!-- 3. 中央 PhotoVogue 經典黑色金屬旋轉屏風 -->
+    <a-box position="-2.5 3 -2" rotation="0 15 0" width="0.1" height="5" depth="2.8" color="#111827"></a-box>
+    <a-box position="0.5 3 -1" rotation="0 -20 0" width="0.1" height="5" depth="2.8" color="#111827"></a-box>
+    <a-box position="3.5 3 -2.5" rotation="0 10 0" width="0.1" height="5" depth="2.8" color="#111827"></a-box>
+
+    <!-- 4. 頂部黑色金屬軌道燈系統 -->
+    <a-cylinder position="0 5.6 -2" rotation="0 0 90" radius="0.04" height="14" color="#1e293b"></a-cylinder>
+    <a-spotlight position="-3 5.4 -2" rotation="-45 0 0" color="#fff7ed" intensity="0.8"></a-spotlight>
+    <a-spotlight position="0 5.4 -2" rotation="-45 0 0" color="#fff7ed" intensity="0.8"></a-spotlight>
+    <a-spotlight position="3 5.4 -2" rotation="-45 0 0" color="#fff7ed" intensity="0.8"></a-spotlight>
+
+    <!-- 動態展位與展品容器 -->
+    <a-entity id="gallery-slots"></a-entity>
+
+    <!-- 玩家視角與移動 -->
+    <a-entity id="rig" movement-controls position="0 1.6 4">
       <a-entity id="player" camera look-controls="pointerLockEnabled: false" wasd-controls>
       </a-entity>
     </a-entity>
@@ -171,130 +247,216 @@
   </a-scene>
 
   <script>
-    let imageCount = 0;
-    let currentArtData = null;
-    const galleryStore = {};
-    const likedArts = new Set(); // 記錄使用者已點讚過的作品 ID
+    // 無版權優雅樂曲播放清單
+    const playlist = ['bgm-1', 'bgm-2'];
+    let currentTrack = 0;
+    let isPlaying = false;
 
-    function handleImageUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const projectNo = prompt("請輸入計畫案號：", "PROJ-2026-00" + (imageCount + 1)) || ("PROJ-2026-00" + (imageCount + 1));
-      const title = prompt("請輸入作品名稱：", "地方創生成果記錄") || "無題";
-      const author = prompt("請輸入創作者姓名：", "陳玟嬡") || "匿名";
-      const desc = prompt("請輸入作品簡介：", "青年百億圓夢基金計劃實踐成果。") || "暫無簡介。";
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const id = 'art_' + Date.now();
-        const artData = { id, projectNo, url: e.target.result, title, author, desc, likes: 0, comments: [] };
-        
-        galleryStore[id] = artData;
-        renderHighQualityArt(artData);
-
-        if (NAF.connection.isConnected()) {
-          NAF.connection.broadcastData('new-image', artData);
-        }
-      };
-      reader.readAsDataURL(file);
+    function enterGallery() {
+      document.getElementById('welcome-overlay').style.display = 'none';
+      playBGM();
     }
 
-    function renderHighQualityArt(data) {
-      imageCount++;
-      const galleryWall = document.getElementById('gallery-wall');
-      const artEntity = document.createElement('a-entity');
-      artEntity.setAttribute('id', data.id);
+    function playBGM() {
+      const audio = document.getElementById(playlist[currentTrack]);
+      if (audio) {
+        audio.play().then(() => {
+          isPlaying = true;
+          document.getElementById('music-control').textContent = '🎵 背景音樂：播放中';
+        }).catch(err => console.log("Audio play error:", err));
 
-      const xPos = (imageCount % 2 === 1) ? -4.5 : 4.5;
-      const yPos = 4.0;
-      const zPos = -7.8;
-      artEntity.setAttribute('position', `${xPos} ${yPos} ${zPos}`);
+        audio.onended = () => {
+          currentTrack = (currentTrack + 1) % playlist.length;
+          playBGM();
+        };
+      }
+    }
 
-      // 1. 立體木質畫框 (加厚外框)
+    function toggleMusic() {
+      const audio = document.getElementById(playlist[currentTrack]);
+      if (!audio) return;
+
+      if (isPlaying) {
+        audio.pause();
+        isPlaying = false;
+        document.getElementById('music-control').textContent = '🔇 背景音樂：已靜音';
+      } else {
+        audio.play();
+        isPlaying = true;
+        document.getElementById('music-control').textContent = '🎵 背景音樂：播放中';
+      }
+    }
+
+    // 展位定義（含中央 PhotoVogue 屏風展位）
+    const SLOT_DEFINITIONS = [
+      // 中央黑色金屬屏風展位
+      { id: 'slot_1', pos: '-2.44 3 -2', rot: '0 105 0' },
+      { id: 'slot_2', pos: '0.56 3 -1', rot: '0 70 0' },
+      { id: 'slot_3', pos: '3.56 3 -2.5', rot: '0 100 0' },
+      // 後方大牆展位 (North)
+      { id: 'slot_4', pos: '-6 3 -9.8', rot: '0 0 0' },
+      { id: 'slot_5', pos: '0 3 -9.8', rot: '0 0 0' },
+      { id: 'slot_6', pos: '6 3 -9.8', rot: '0 0 0' },
+      // 右牆 (East)
+      { id: 'slot_7', pos: '9.8 3 -3', rot: '0 -90 0' },
+      { id: 'slot_8', pos: '9.8 3 3', rot: '0 -90 0' },
+      // 左牆 (West)
+      { id: 'slot_9', pos: '-9.8 3 -3', rot: '0 90 0' },
+      { id: 'slot_10', pos: '-9.8 3 3', rot: '0 90 0' }
+    ];
+
+    let currentArtData = null;
+    const galleryStore = JSON.parse(localStorage.getItem('YOUTH_DREAM_GALLERY_STORE') || '{}');
+    const likedArts = new Set();
+
+    window.addEventListener('load', () => {
+      initGallerySlots();
+    });
+
+    function initGallerySlots() {
+      const container = document.getElementById('gallery-slots');
+      container.innerHTML = '';
+
+      SLOT_DEFINITIONS.forEach(slot => {
+        const slotGroup = document.createElement('a-entity');
+        slotGroup.setAttribute('position', slot.pos);
+        slotGroup.setAttribute('rotation', slot.rot);
+
+        const occupiedData = galleryStore[slot.id];
+
+        if (occupiedData) {
+          renderArtSlot(slotGroup, occupiedData, slot.id);
+        } else {
+          renderEmptySlot(slotGroup, slot.id);
+        }
+
+        container.appendChild(slotGroup);
+      });
+    }
+
+    function renderEmptySlot(group, slotId) {
+      const emptyBox = document.createElement('a-plane');
+      emptyBox.setAttribute('color', '#94a3b8');
+      emptyBox.setAttribute('width', '2.8');
+      emptyBox.setAttribute('height', '2.0');
+      emptyBox.setAttribute('material', 'side: double; opacity: 0.3; transparent: true;');
+      emptyBox.setAttribute('class', 'clickable');
+
+      const text = document.createElement('a-text');
+      text.setAttribute('value', '＋ 點擊此展位策展上傳');
+      text.setAttribute('align', 'center');
+      text.setAttribute('color', '#1e293b');
+      text.setAttribute('width', '3.5');
+      text.setAttribute('position', '0 0 0.02');
+
+      emptyBox.appendChild(text);
+
+      emptyBox.addEventListener('click', () => {
+        uploadToSlot(slotId);
+      });
+
+      group.appendChild(emptyBox);
+    }
+
+    function uploadToSlot(slotId) {
+      if (galleryStore[slotId]) {
+        alert('這個展位已經被其它參展者使用了！請選擇別的展位。');
+        return;
+      }
+
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const projectNo = prompt("請輸入計畫案號：", "PROJ-2026-0" + slotId.split('_')[1]) || "PROJ-2026-001";
+        const title = prompt("請輸入作品名稱：", "記憶的隙縫") || "無題";
+        const author = prompt("請輸入創作者姓名：", "陳玟嬡") || "匿名";
+        const desc = prompt("請輸入作品簡介：", "青年百億圓夢基金計劃實踐成果。") || "暫無簡介。";
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const artData = {
+            id: slotId,
+            projectNo,
+            url: evt.target.result,
+            title,
+            author,
+            desc,
+            likes: 0,
+            comments: []
+          };
+
+          galleryStore[slotId] = artData;
+          localStorage.setItem('YOUTH_DREAM_GALLERY_STORE', JSON.stringify(galleryStore));
+          initGallerySlots();
+
+          if (NAF.connection.isConnected()) {
+            NAF.connection.broadcastData('new-image-slot', artData);
+          }
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    }
+
+    function renderArtSlot(group, data, slotId) {
+      // 1. PhotoVogue 極簡極細黑金屬框
       const frame = document.createElement('a-box');
-      frame.setAttribute('color', '#1e1b18');
-      frame.setAttribute('width', '3.4');
-      frame.setAttribute('height', '2.6');
-      frame.setAttribute('depth', '0.1');
-      frame.setAttribute('position', '0 0 -0.05');
+      frame.setAttribute('color', '#0f172a');
+      frame.setAttribute('width', '2.9');
+      frame.setAttribute('height', '2.1');
+      frame.setAttribute('depth', '0.04');
+      frame.setAttribute('position', '0 0 -0.02');
 
-      // 2. 畫框卡紙白邊 (Mat board)
-      const mat = document.createElement('a-plane');
-      mat.setAttribute('color', '#ffffff');
-      mat.setAttribute('width', '3.2');
-      mat.setAttribute('height', '2.4');
-      mat.setAttribute('position', '0 0 0.01');
-
-      // 3. 高解析度照片本體（最佳化不吃畫質）
+      // 2. 高解析度照片本體
       const img = document.createElement('a-image');
       img.setAttribute('src', data.url);
-      img.setAttribute('width', '2.9');
-      img.setAttribute('height', '2.1');
-      img.setAttribute('position', '0 0 0.02');
+      img.setAttribute('width', '2.8');
+      img.setAttribute('height', '2.0');
+      img.setAttribute('position', '0 0 0.01');
       img.setAttribute('class', 'clickable');
       img.setAttribute('material', 'npot: true; anisotropy: 16; mipmaps: true;');
 
-      // 4. 掛畫繩索細節
-      const cordLeft = document.createElement('a-cylinder');
-      cordLeft.setAttribute('color', '#94a3b8');
-      cordLeft.setAttribute('radius', '0.01');
-      cordLeft.setAttribute('height', '1.5');
-      cordLeft.setAttribute('position', '-1.2 1.8 -0.02');
-      cordLeft.setAttribute('rotation', '0 0 -25');
-
-      const cordRight = document.createElement('a-cylinder');
-      cordRight.setAttribute('color', '#94a3b8');
-      cordRight.setAttribute('radius', '0.01');
-      cordRight.setAttribute('height', '1.5');
-      cordRight.setAttribute('position', '1.2 1.8 -0.02');
-      cordRight.setAttribute('rotation', '0 0 25');
-
-      // 5. 現實展覽風：畫框下方的實體說明名牌
+      // 3. 極簡名牌
       const plate = document.createElement('a-plane');
       plate.setAttribute('color', '#0f172a');
-      plate.setAttribute('width', '2.8');
-      plate.setAttribute('height', '0.8');
-      plate.setAttribute('position', '0 -1.8 0.02');
+      plate.setAttribute('width', '2.4');
+      plate.setAttribute('height', '0.7');
+      plate.setAttribute('position', '0 -1.5 0.01');
 
-      // 說明牌內容：包含計畫案號、作品名稱、創作者（不含 By）
       const plateText = document.createElement('a-text');
       plateText.setAttribute('value', `${data.projectNo}\n${data.title}\n${data.author}`);
       plateText.setAttribute('align', 'center');
       plateText.setAttribute('color', '#f8fafc');
-      plateText.setAttribute('width', '3.8');
+      plateText.setAttribute('width', '3.5');
       plateText.setAttribute('position', '0 0 0.01');
       plate.appendChild(plateText);
 
-      // 組合元件
-      artEntity.appendChild(frame);
-      artEntity.appendChild(mat);
-      artEntity.appendChild(img);
-      artEntity.appendChild(cordLeft);
-      artEntity.appendChild(cordRight);
-      artEntity.appendChild(plate);
+      group.appendChild(frame);
+      group.appendChild(img);
+      group.appendChild(plate);
 
-      // 點擊事件：開啟彈窗進行留言與按讚
       img.addEventListener('click', function () {
-        openModal(data.id);
+        openModal(slotId);
       });
-
-      galleryWall.appendChild(artEntity);
     }
 
-    function openModal(artId) {
-      currentArtData = galleryStore[artId];
+    function openModal(slotId) {
+      currentArtData = galleryStore[slotId];
       if (!currentArtData) return;
 
       document.getElementById('modal-project-no').textContent = `計畫案號：${currentArtData.projectNo || '未填寫'}`;
       document.getElementById('modal-title').textContent = currentArtData.title;
       document.getElementById('modal-author').textContent = currentArtData.author;
       document.getElementById('modal-desc').textContent = currentArtData.desc;
+      document.getElementById('modal-img-preview').src = currentArtData.url;
       document.getElementById('modal-like-count').textContent = currentArtData.likes || 0;
 
-      // 檢查是否已經點過讚
       const likeBtn = document.getElementById('like-button');
-      if (likedArts.has(artId)) {
+      if (likedArts.has(slotId)) {
         likeBtn.disabled = true;
         likeBtn.innerHTML = `❤️ <span id="modal-like-count">${currentArtData.likes || 0}</span> 人喜愛（已按讚）`;
       } else {
@@ -306,17 +468,17 @@
       document.getElementById('art-modal').style.display = 'block';
     }
 
-    function closeModal() {
-      document.getElementById('art-modal').style.display = 'none';
-    }
+    function closeModal() { document.getElementById('art-modal').style.display = 'none'; }
+    function openLightbox() { if (!currentArtData) return; document.getElementById('lightbox-img').src = currentArtData.url; document.getElementById('full-lightbox').style.display = 'flex'; }
+    function closeLightbox() { document.getElementById('full-lightbox').style.display = 'none'; }
 
-    // 按讚機制：限制一人一次
     function addLike() {
       if (!currentArtData || likedArts.has(currentArtData.id)) return;
-
       likedArts.add(currentArtData.id);
       currentArtData.likes = (currentArtData.likes || 0) + 1;
-      
+      galleryStore[currentArtData.id] = currentArtData;
+      localStorage.setItem('YOUTH_DREAM_GALLERY_STORE', JSON.stringify(galleryStore));
+
       const likeBtn = document.getElementById('like-button');
       likeBtn.disabled = true;
       likeBtn.innerHTML = `❤️ <span id="modal-like-count">${currentArtData.likes}</span> 人喜愛（已按讚）`;
@@ -333,7 +495,9 @@
 
       if (!currentArtData.comments) currentArtData.comments = [];
       currentArtData.comments.push(text);
-      
+      galleryStore[currentArtData.id] = currentArtData;
+      localStorage.setItem('YOUTH_DREAM_GALLERY_STORE', JSON.stringify(galleryStore));
+
       updateCommentsUI();
       input.value = '';
 
@@ -359,14 +523,16 @@
     }
 
     document.body.addEventListener('connected', function () {
-      NAF.connection.subscribeToData('new-image', (senderId, dataType, data) => {
+      NAF.connection.subscribeToData('new-image-slot', (senderId, dataType, data) => {
         galleryStore[data.id] = data;
-        renderHighQualityArt(data);
+        localStorage.setItem('YOUTH_DREAM_GALLERY_STORE', JSON.stringify(galleryStore));
+        initGallerySlots();
       });
 
       NAF.connection.subscribeToData('update-like', (senderId, dataType, data) => {
         if (galleryStore[data.id]) {
           galleryStore[data.id].likes = data.likes;
+          localStorage.setItem('YOUTH_DREAM_GALLERY_STORE', JSON.stringify(galleryStore));
           if (currentArtData && currentArtData.id === data.id) {
             document.getElementById('modal-like-count').textContent = data.likes;
           }
@@ -377,6 +543,7 @@
         if (galleryStore[data.id]) {
           if (!galleryStore[data.id].comments) galleryStore[data.id].comments = [];
           galleryStore[data.id].comments.push(data.comment);
+          localStorage.setItem('YOUTH_DREAM_GALLERY_STORE', JSON.stringify(galleryStore));
           if (currentArtData && currentArtData.id === data.id) {
             updateCommentsUI();
           }
