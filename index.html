@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>極簡高畫質藝廊</title>
+  <title>青年百億圓夢基金計劃照片展</title>
 
   <!-- A-Frame 3D 引擎與連線套件 -->
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
@@ -13,7 +13,7 @@
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; overflow: hidden; }
 
-    /* 強制隱藏 A-Frame 產生的任何中央圓點與預設游標 */
+    /* 強制隱藏 A-Frame 中央圓點與預設游標 */
     .a-canvas { cursor: default !important; }
     .a-cursor-ring, .a-mouse-cursor-inner, a-cursor {
       display: none !important;
@@ -53,7 +53,7 @@
     .btn-action:hover { background: #2563eb; transform: scale(1.05); }
     #file-input { display: none; }
 
-    /* 作品點擊詳細互動視窗 */
+    /* 作品點擊詳細留言互動視窗 */
     #art-modal {
       display: none;
       position: absolute;
@@ -70,6 +70,7 @@
       max-width: 90vw;
     }
     #art-modal h3 { margin: 0 0 4px 0; color: #0f172a; font-size: 20px; }
+    #art-modal .project-no { font-size: 12px; color: #2563eb; font-weight: 600; margin-bottom: 2px; }
     #art-modal .author { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 12px; }
     #art-modal .desc { font-size: 14px; color: #334155; line-height: 1.6; margin-bottom: 16px; }
 
@@ -82,8 +83,15 @@
       border-radius: 16px;
       cursor: pointer;
       font-weight: 600;
+      transition: all 0.2s;
     }
     .like-btn:hover { background: #ffe4e6; }
+    .like-btn:disabled {
+      background: #f1f5f9;
+      color: #94a3b8;
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+    }
 
     .comments-section { border-top: 1px solid #e2e8f0; padding-top: 12px; }
     .comments-title { font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 8px; }
@@ -108,20 +116,21 @@
 
   <!-- 頂部導覽列 -->
   <div id="navbar">
-    <div id="exhibition-title">✨ 我的光影藝廊</div>
-    <button class="btn-action" onclick="document.getElementById('file-input').click()">➕ 參展 / 上傳畫作</button>
+    <div id="exhibition-title">✨ 青年百億圓夢基金計劃照片展</div>
+    <button class="btn-action" onclick="document.getElementById('file-input').click()">➕ 參展 / 上傳照片</button>
     <input type="file" id="file-input" accept="image/*" onchange="handleImageUpload(event)">
   </div>
 
-  <!-- 作品彈窗 -->
+  <!-- 作品彈窗 (互動與留言) -->
   <div id="art-modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="project-no" id="modal-project-no">案號：PROJ-2026-001</div>
     <h3 id="modal-title">作品標題</h3>
-    <div class="author" id="modal-author">By 創作者</div>
+    <div class="author" id="modal-author">創作者名單</div>
     <div class="desc" id="modal-desc">作品介紹...</div>
 
     <div class="like-section">
-      <button class="like-btn" onclick="addLike()">❤️ <span id="modal-like-count">0</span> 人喜愛</button>
+      <button class="like-btn" id="like-button" onclick="addLike()">❤️ <span id="modal-like-count">0</span> 人喜愛</button>
     </div>
 
     <div class="comments-section">
@@ -158,7 +167,6 @@
       </a-entity>
     </a-entity>
 
-    <!-- 將 raycaster 綁定在場景層級，徹底移除 3D 畫面中的中央圓點元件 -->
     <a-entity cursor="rayOrigin: mouse" raycaster="objects: .clickable"></a-entity>
   </a-scene>
 
@@ -166,19 +174,21 @@
     let imageCount = 0;
     let currentArtData = null;
     const galleryStore = {};
+    const likedArts = new Set(); // 記錄使用者已點讚過的作品 ID
 
     function handleImageUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
 
-      const title = prompt("請輸入作品名稱：", "日光漫步") || "無題";
-      const author = prompt("請輸入創作者姓名：", "玟嬡") || "匿名";
-      const desc = prompt("請輸入作品介紹：", "這是一幅捕捉光影變化的作品。") || "暫無介紹。";
+      const projectNo = prompt("請輸入計畫案號：", "PROJ-2026-00" + (imageCount + 1)) || ("PROJ-2026-00" + (imageCount + 1));
+      const title = prompt("請輸入作品名稱：", "地方創生成果記錄") || "無題";
+      const author = prompt("請輸入創作者姓名：", "陳玟嬡") || "匿名";
+      const desc = prompt("請輸入作品簡介：", "青年百億圓夢基金計劃實踐成果。") || "暫無簡介。";
 
       const reader = new FileReader();
       reader.onload = function(e) {
         const id = 'art_' + Date.now();
-        const artData = { id, url: e.target.result, title, author, desc, likes: 0, comments: [] };
+        const artData = { id, projectNo, url: e.target.result, title, author, desc, likes: 0, comments: [] };
         
         galleryStore[id] = artData;
         renderHighQualityArt(artData);
@@ -204,26 +214,26 @@
       // 1. 立體木質畫框 (加厚外框)
       const frame = document.createElement('a-box');
       frame.setAttribute('color', '#1e1b18');
-      frame.setAttribute('width', '3.2');
-      frame.setAttribute('height', '2.4');
+      frame.setAttribute('width', '3.4');
+      frame.setAttribute('height', '2.6');
       frame.setAttribute('depth', '0.1');
       frame.setAttribute('position', '0 0 -0.05');
 
       // 2. 畫框卡紙白邊 (Mat board)
       const mat = document.createElement('a-plane');
       mat.setAttribute('color', '#ffffff');
-      mat.setAttribute('width', '3.0');
-      mat.setAttribute('height', '2.2');
+      mat.setAttribute('width', '3.2');
+      mat.setAttribute('height', '2.4');
       mat.setAttribute('position', '0 0 0.01');
 
-      // 3. 高畫質照片本體
+      // 3. 高解析度照片本體（最佳化不吃畫質）
       const img = document.createElement('a-image');
       img.setAttribute('src', data.url);
-      img.setAttribute('width', '2.7');
-      img.setAttribute('height', '1.9');
+      img.setAttribute('width', '2.9');
+      img.setAttribute('height', '2.1');
       img.setAttribute('position', '0 0 0.02');
       img.setAttribute('class', 'clickable');
-      img.setAttribute('material', 'npot: true; anisotropy: 16;');
+      img.setAttribute('material', 'npot: true; anisotropy: 16; mipmaps: true;');
 
       // 4. 掛畫繩索細節
       const cordLeft = document.createElement('a-cylinder');
@@ -240,18 +250,19 @@
       cordRight.setAttribute('position', '1.2 1.8 -0.02');
       cordRight.setAttribute('rotation', '0 0 25');
 
-      // 5. 高質感作品說明名牌
+      // 5. 現實展覽風：畫框下方的實體說明名牌
       const plate = document.createElement('a-plane');
       plate.setAttribute('color', '#0f172a');
-      plate.setAttribute('width', '2.2');
-      plate.setAttribute('height', '0.6');
-      plate.setAttribute('position', '0 -1.6 0.02');
+      plate.setAttribute('width', '2.8');
+      plate.setAttribute('height', '0.8');
+      plate.setAttribute('position', '0 -1.8 0.02');
 
+      // 說明牌內容：包含計畫案號、作品名稱、創作者（不含 By）
       const plateText = document.createElement('a-text');
-      plateText.setAttribute('value', `${data.title}\nBy ${data.author}`);
+      plateText.setAttribute('value', `${data.projectNo}\n${data.title}\n${data.author}`);
       plateText.setAttribute('align', 'center');
       plateText.setAttribute('color', '#f8fafc');
-      plateText.setAttribute('width', '3.5');
+      plateText.setAttribute('width', '3.8');
       plateText.setAttribute('position', '0 0 0.01');
       plate.appendChild(plateText);
 
@@ -263,7 +274,7 @@
       artEntity.appendChild(cordRight);
       artEntity.appendChild(plate);
 
-      // 點擊事件
+      // 點擊事件：開啟彈窗進行留言與按讚
       img.addEventListener('click', function () {
         openModal(data.id);
       });
@@ -275,10 +286,21 @@
       currentArtData = galleryStore[artId];
       if (!currentArtData) return;
 
+      document.getElementById('modal-project-no').textContent = `計畫案號：${currentArtData.projectNo || '未填寫'}`;
       document.getElementById('modal-title').textContent = currentArtData.title;
-      document.getElementById('modal-author').textContent = `By ${currentArtData.author}`;
+      document.getElementById('modal-author').textContent = currentArtData.author;
       document.getElementById('modal-desc').textContent = currentArtData.desc;
       document.getElementById('modal-like-count').textContent = currentArtData.likes || 0;
+
+      // 檢查是否已經點過讚
+      const likeBtn = document.getElementById('like-button');
+      if (likedArts.has(artId)) {
+        likeBtn.disabled = true;
+        likeBtn.innerHTML = `❤️ <span id="modal-like-count">${currentArtData.likes || 0}</span> 人喜愛（已按讚）`;
+      } else {
+        likeBtn.disabled = false;
+        likeBtn.innerHTML = `❤️ <span id="modal-like-count">${currentArtData.likes || 0}</span> 人喜愛`;
+      }
 
       updateCommentsUI();
       document.getElementById('art-modal').style.display = 'block';
@@ -288,10 +310,16 @@
       document.getElementById('art-modal').style.display = 'none';
     }
 
+    // 按讚機制：限制一人一次
     function addLike() {
-      if (!currentArtData) return;
+      if (!currentArtData || likedArts.has(currentArtData.id)) return;
+
+      likedArts.add(currentArtData.id);
       currentArtData.likes = (currentArtData.likes || 0) + 1;
-      document.getElementById('modal-like-count').textContent = currentArtData.likes;
+      
+      const likeBtn = document.getElementById('like-button');
+      likeBtn.disabled = true;
+      likeBtn.innerHTML = `❤️ <span id="modal-like-count">${currentArtData.likes}</span> 人喜愛（已按讚）`;
 
       if (NAF.connection.isConnected()) {
         NAF.connection.broadcastData('update-like', { id: currentArtData.id, likes: currentArtData.likes });
