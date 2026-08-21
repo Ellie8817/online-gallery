@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>青年百億圓夢展示區與夢想互動牆</title>
+  <title>青年百億圓夢展示區</title>
 
   <!-- A-Frame 3D 引擎 -->
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
 
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; overflow: hidden; background: #0f172a; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; overflow: hidden; background: #1e293b; }
 
     .a-canvas { cursor: default !important; }
     .a-cursor-ring, .a-mouse-cursor-inner, a-cursor { display: none !important; opacity: 0 !important; visibility: hidden !important; }
@@ -18,7 +18,7 @@
     #welcome-overlay {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      backdrop-filter: blur(20px); z-index: 99999;
+      backdrop-filter: blur(20px); z-index: 9999;
       display: flex; flex-direction: column; justify-content: center; align-items: center; color: #f8fafc; text-align: center;
     }
     #welcome-overlay .dream-subtitle { font-size: 14px; letter-spacing: 6px; color: #38bdf8; text-transform: uppercase; margin-bottom: 12px; font-weight: 700; }
@@ -58,7 +58,7 @@
 
     /* 通用 Modal 彈窗樣式 */
     .modal-panel {
-      display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000;
+      display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;
       background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.15);
       padding: 28px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); width: 440px; max-width: 90vw; max-height: 85vh; overflow-y: auto; color: #f8fafc;
     }
@@ -97,7 +97,7 @@
 
     #full-lightbox {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.9); z-index: 20000; justify-content: center; align-items: center;
+      background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center;
     }
     #full-lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 8px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); object-fit: contain; }
     #full-lightbox .close-lightbox { position: absolute; top: 20px; right: 30px; color: #ffffff; font-size: 36px; cursor: pointer; }
@@ -113,17 +113,16 @@
   <div id="welcome-overlay">
     <div class="dream-subtitle">YOUTH DREAM FUND EXHIBITION</div>
     <h1>青年百億圓夢展示區</h1>
-    <p>歡迎來到極光藝廊與獨立夢想互動光影大廳。點擊下方按鈕即可順暢進入展廳欣賞作品。</p>
+    <p>歡迎來到極光藝廊與夢想家光影展示區。點擊下方按鈕即可順暢進入展廳欣賞作品與參與即時心願互動。</p>
     <button class="btn-enter" onclick="enterGallery()">進入展廳開始觀賞</button>
   </div>
 
   <!-- 頂部導覽列 -->
   <div id="navbar">
-    <div id="exhibition-title" style="cursor:pointer;" onclick="switchSpace('main')">✨ 青年百億圓夢展示區</div>
+    <div id="exhibition-title">✨ 青年百億圓夢展示區</div>
     <div id="user-badge">👤 觀賞者（未登入）</div>
     <button class="nav-btn" id="login-nav-btn" onclick="openLoginModal()">策展人登入</button>
-    <!-- 切換至獨立的夢想互動牆區域 -->
-    <button class="nav-btn" id="space-switch-btn" onclick="switchSpace('interactive')" style="background:#0284c7; color:#fff; border:none;">🌸 前往夢想互動光影大廳</button>
+    <button class="nav-btn" onclick="openInteractiveModal()" style="background:#0284c7; color:#fff; border:none;">🌸 夢想留言牆互動</button>
     <button class="nav-btn" onclick="toggleMusic()" id="music-btn">🎵 音樂：播放中</button>
     <button class="nav-btn" onclick="openAdminModal()">📊 後台紀錄</button>
     <button class="nav-btn nav-btn-exit" onclick="exitGallery()">🚪 離開展館</button>
@@ -131,7 +130,7 @@
 
   <!-- 底部操作指示語 -->
   <div id="nav-instructions">
-    🖱️ <b>滑鼠拖曳</b>：旋轉視角 ｜ 🎯 <b>點擊作品展位</b>：觀看與留言互動 ｜ ⌨️ <b>WASD / 方向鍵</b>：漫遊展館
+    🖱️ <b>滑鼠拖曳</b>：旋轉視角 ｜ 🎯 <b>點擊作品/圓形展區</b>：觀看與留言互動 ｜ ⌨️ <b>WASD / 方向鍵</b>：漫遊展館（牆面防穿透）
   </div>
 
   <!-- 1. 策展人登入 Modal -->
@@ -184,12 +183,12 @@
     </div>
   </div>
 
-  <!-- 4. 夢想家光影互動牆表單 Modal -->
+  <!-- 4. 夢想家光影展示區 Modal -->
   <div id="interactive-modal" class="modal-panel">
     <button class="modal-close" onclick="closeModal('interactive-modal')">✕</button>
-    <h3>🌸 夢想家光影互動留言</h3>
+    <h3>🌸 夢想家光影互動留言牆</h3>
     <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">
-      在獨立的夢想互動大廳中留下您的祝福。送出後，心願將立即投影至大廳四周的光影牆面上並施放璀璨煙火！
+      所有策展人與觀覽者皆可在此自由留言。送出後，您的心願與花卉光影將即時投影在中央圓形建築的牆面上持續 1 分鐘，並觸發璀璨煙火！
     </p>
     <div class="form-group"><label>留下您的名字或暱稱 *</label><input type="text" id="int-name" placeholder="例如：追夢人小陳"></div>
     <div class="form-group"><label>祝福與圓夢心願留言 *</label><textarea id="int-msg" rows="3" placeholder="寫下您的夢想宣言..."></textarea></div>
@@ -213,7 +212,7 @@
         <option value="🌺 熱帶扶桑">🌺 熱帶扶桑 (Hibiscus)</option>
       </select>
     </div>
-    <button class="btn-enter" style="width: 100%; border-radius: 12px; margin-top: 10px;" onclick="submitInteractiveWish()">✨ 投影至光影牆並施放煙火</button>
+    <button class="btn-enter" style="width: 100%; border-radius: 12px; margin-top: 10px;" onclick="submitInteractiveWish()">✨ 投影至圓形建築並施放煙火</button>
   </div>
 
   <!-- 5. 後台紀錄 Modal -->
@@ -243,69 +242,51 @@
     <img id="lightbox-img" src="" alt="高解析原圖">
   </div>
 
-  <!-- 3D 展覽場景 (包含主展區與獨立的夢想互動大廳) -->
+  <!-- 3D 展覽場景 -->
   <a-scene embedded raycaster="objects: .clickable">
     <a-assets>
+      <canvas id="wood-texture" width="512" height="512"></canvas>
       <audio id="bgm-1" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=soft-piano-100-bpm-121529.mp3" preload="auto"></audio>
     </a-assets>
 
     <a-sky color="#0f172a"></a-sky>
 
-    <!-- 高亮度的全方位光照 -->
+    <!-- 高亮度的全方位光照，徹底解決全黑問題 -->
     <a-entity light="type: ambient; color: #ffffff; intensity: 1.2;"></a-entity>
     <a-entity light="type: directional; color: #ffffff; intensity: 0.8;" position="0 50 0"></a-entity>
 
-    <!-- ========================================== -->
-    <!-- 空間 A：主展覽區 (預設位置)                  -->
-    <!-- ========================================== -->
-    <a-entity id="space-main">
-      <!-- 典雅木質色調地板 -->
-      <a-plane id="ground" class="clickable" position="0 0 0" rotation="-90 0 0" width="160" height="160" color="#784d33" material="roughness: 0.4;"></a-plane>
-      <a-plane position="0 14 0" rotation="90 0 0" width="160" height="160" color="#1e293b"></a-plane>
+    <!-- 木質地板 -->
+    <a-plane id="ground" class="clickable" position="0 0 0" rotation="-90 0 0" width="160" height="160" material="src: #wood-texture; repeat: 32 32; roughness: 0.35;"></a-plane>
 
-      <!-- 外圍邊界牆面 -->
-      <a-box class="wall-boundary" position="0 7 -80" width="160" height="14" depth="1.5" color="#334155" material="roughness: 0.8;"></a-box>
-      <a-box class="wall-boundary" position="0 7 80" width="160" height="14" depth="1.5" color="#334155" material="roughness: 0.8;"></a-box>
-      <a-box class="wall-boundary" position="-80 7 0" width="1.5" height="14" depth="160" color="#334155" material="roughness: 0.8;"></a-box>
-      <a-box class="wall-boundary" position="80 7 0" width="1.5" height="14" depth="160" color="#334155" material="roughness: 0.8;"></a-box>
+    <!-- 天花板 -->
+    <a-plane position="0 14 0" rotation="90 0 0" width="160" height="160" color="#1e293b"></a-plane>
 
-      <!-- 內部獨立展牆 -->
-      <a-box class="wall-boundary" position="-35 6 -30" width="0.8" height="12" depth="30" color="#1e293b" material="roughness: 0.8"></a-box>
-      <a-box class="wall-boundary" position="35 6 -30" width="0.8" height="12" depth="30" color="#1e293b" material="roughness: 0.8"></a-box>
-      <a-box class="wall-boundary" position="-35 6 30" width="0.8" height="12" depth="30" color="#1e293b" material="roughness: 0.8"></a-box>
-      <a-box class="wall-boundary" position="35 6 30" width="0.8" height="12" depth="30" color="#1e293b" material="roughness: 0.8"></a-box>
+    <!-- 外圍邊界牆面 -->
+    <a-box class="wall-boundary" position="0 7 -80" width="160" height="14" depth="1.5" color="#334155" material="roughness: 0.8;"></a-box>
+    <a-box class="wall-boundary" position="0 7 80" width="160" height="14" depth="1.5" color="#334155" material="roughness: 0.8;"></a-box>
+    <a-box class="wall-boundary" position="-80 7 0" width="1.5" height="14" depth="160" color="#334155" material="roughness: 0.8;"></a-box>
+    <a-box class="wall-boundary" position="80 7 0" width="1.5" height="14" depth="160" color="#334155" material="roughness: 0.8;"></a-box>
 
-      <!-- 動態展位容器 -->
-      <a-entity id="gallery-slots"></a-entity>
+    <!-- 內部獨立展牆 -->
+    <a-box class="wall-boundary" position="-35 6 -30" width="0.8" height="12" depth="30" color="#1e293b" material="roughness: 0.8"></a-box>
+    <a-box class="wall-boundary" position="35 6 -30" width="0.8" height="12" depth="30" color="#1e293b" material="roughness: 0.8"></a-box>
+    <a-box class="wall-boundary" position="-35 6 30" width="0.8" height="12" depth="30" color="#1e293b" material="roughness: 0.8"></a-box>
+    <a-box class="wall-boundary" position="35 6 30" width="0.8" height="12" depth="30" color="#1e293b" material="roughness: 0.8"></a-box>
+
+    <!-- 中央「夢想家光影展示區」圓形建築 -->
+    <a-entity id="dream-round-building" position="0 0 0">
+      <a-cylinder class="wall-boundary clickable" radius="12" height="12" position="0 6 0" open-ended="true" color="#1e293b" material="side: double; roughness: 0.3;" onclick="openInteractiveModal()"></a-cylinder>
+      <a-cone radius-bottom="12.2" height="4" position="0 14 0" color="#0ea5e9" material="roughness: 0.4;"></a-cone>
+      <a-text value="🌸 夢想家光影展示區\n(點擊牆面自由留言與賞花)" align="center" color="#38bdf8" width="14" position="0 8.5 -12.1"></a-text>
+      <a-text value="🌸 夢想家光影展示區\n(點擊牆面自由留言與賞花)" align="center" color="#38bdf8" width="14" position="0 8.5 12.1" rotation="0 180 0"></a-text>
+      <a-entity id="live-wishes-container" position="0 6 0"></a-entity>
+      <a-entity id="fireworks-container" position="0 10 0"></a-entity>
     </a-entity>
 
-    <!-- ========================================== -->
-    <!-- 空間 B：獨立的夢想互動光影大廳 (轉送到另一座標) -->
-    <!-- ========================================== -->
-    <a-entity id="space-interactive" visible="false" position="0 0 -300">
-      <a-plane position="0 0 0" rotation="-90 0 0" width="80" height="80" color="#0284c7" material="roughness: 0.3;"></a-plane>
-      <a-plane position="0 12 0" rotation="90 0 0" width="80" height="80" color="#0f172a"></a-plane>
+    <!-- 動態展位容器 -->
+    <a-entity id="gallery-slots"></a-entity>
 
-      <!-- 獨立大廳四周光影展示牆 -->
-      <a-box position="0 6 -40" width="80" height="12" depth="1" color="#1e293b" material="roughness: 0.5"></a-box>
-      <a-box position="0 6 40" width="80" height="12" depth="1" color="#1e293b" material="roughness: 0.5"></a-box>
-      <a-box position="-40 6 0" width="1" height="12" depth="80" color="#1e293b" material="roughness: 0.5"></a-box>
-      <a-box position="40 6 0" width="1" height="12" depth="80" color="#1e293b" material="roughness: 0.5"></a-box>
-
-      <a-text value="🌸 獨立夢想家光影互動大廳 🌸\n(點擊下方按鈕開啟留言與許願)" align="center" color="#38bdf8" width="18" position="0 8 -39"></a-text>
-      
-      <a-entity position="0 2 -35">
-        <a-box class="clickable" color="#38bdf8" width="8" height="2" depth="0.4" onclick="openModal('interactive-modal')">
-          <a-text value="點此寫下您的夢想心願" align="center" color="#0f172a" width="7" position="0 0 0.25"></a-text>
-        </a-box>
-      </a-entity>
-
-      <!-- 投射心願與煙火的容器 -->
-      <a-entity id="live-wishes-container" position="0 5 0"></a-entity>
-      <a-entity id="fireworks-container" position="0 9 0"></a-entity>
-    </a-entity>
-
-    <!-- 玩家視角系統 -->
+    <!-- 玩家視角系統（初始設置在中央區域 0 1.6 30，由遠到近欣賞展覽，絕不貼牆） -->
     <a-entity id="rig" position="0 1.6 30">
       <a-entity id="player" camera look-controls="pointerLockEnabled: false" wasd-controls="acceleration: 60; fly: false;">
       </a-entity>
@@ -315,18 +296,31 @@
   </a-scene>
 
   <script>
+    // 0. 生成木質地板紋理
+    function generateWoodTexture() {
+      const canvas = document.getElementById('wood-texture');
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#85583b';
+      ctx.fillRect(0, 0, 512, 512);
+
+      const plankHeight = 64;
+      for (let y = 0; y < 512; y += plankHeight) {
+        ctx.fillStyle = (y / plankHeight) % 2 === 0 ? '#784d33' : '#6b432c';
+        ctx.fillRect(0, y, 512, plankHeight - 2);
+      }
+    }
+    generateWoodTexture();
+
+    // 1. 狀態管理
     let currentUser = JSON.parse(localStorage.getItem('YOUTH_GALLERY_USER') || 'null');
     const galleryStore = JSON.parse(localStorage.getItem('YOUTH_GALLERY_STORE') || '{}');
     let activeWishes = JSON.parse(localStorage.getItem('YOUTH_ACTIVE_WISHES') || '[]');
     let selectedSlotForUpload = null;
     let currentActiveArt = null;
     let isPlaying = false;
-    let currentSpace = 'main'; // 'main' 或 'interactive'
 
     function enterGallery() {
       document.getElementById('welcome-overlay').style.display = 'none';
-      window.dispatchEvent(new Event('resize'));
-
       const audio = document.getElementById('bgm-1');
       if (audio) {
         audio.volume = 0.4;
@@ -357,33 +351,7 @@
       }
     }
 
-    // 切換空間 (主展覽區 vs 獨立夢想互動光影大廳)
-    function switchSpace(spaceType) {
-      const rig = document.getElementById('rig');
-      const spaceMain = document.getElementById('space-main');
-      const spaceInteractive = document.getElementById('space-interactive');
-      const switchBtn = document.getElementById('space-switch-btn');
-      const titleElem = document.getElementById('exhibition-title');
-
-      currentSpace = spaceType;
-      if (spaceType === 'interactive') {
-        spaceMain.setAttribute('visible', 'false');
-        spaceInteractive.setAttribute('visible', 'true');
-        rig.setAttribute('position', '0 1.6 -270'); // 傳送到互動大廳內部
-        switchBtn.textContent = '🏠 返回主展覽區';
-        switchBtn.setAttribute('onclick', "switchSpace('main')");
-        titleElem.textContent = '✨ 獨立夢想互動光影大廳';
-      } else {
-        spaceInteractive.setAttribute('visible', 'false');
-        spaceMain.setAttribute('visible', 'true');
-        rig.setAttribute('position', '0 1.6 30'); // 傳回主展覽區入口
-        switchBtn.textContent = '🌸 前往夢想互動光影大廳';
-        switchBtn.setAttribute('onclick', "switchSpace('interactive')");
-        titleElem.textContent = '✨ 青年百億圓夢展示區';
-      }
-      window.dispatchEvent(new Event('resize'));
-    }
-
+    // 2. 嚴格防穿透碰撞檢測
     const innerWallObstacles = [
       { minX: -37, maxX: -33, minZ: -45, maxZ: -15 },
       { minX: 33, maxX: 37, minZ: -45, maxZ: -15 },
@@ -398,18 +366,15 @@
       setInterval(() => {
         if (!rig) return;
         const currentPos = rig.getAttribute('position');
-
-        // 如果在互動大廳內，限制在互動大廳範圍
-        if (currentSpace === 'interactive') {
-          let validX = Math.max(-37, Math.min(37, currentPos.x));
-          let validZ = Math.max(-335, Math.min(-265, currentPos.z));
-          rig.setAttribute('position', `${validX} 1.6 ${validZ}`);
-          return;
-        }
-
-        // 主展覽區碰撞邏輯
         let validX = Math.max(-77, Math.min(77, currentPos.x));
         let validZ = Math.max(-77, Math.min(77, currentPos.z));
+
+        const distFromCenter = Math.sqrt(validX * validX + validZ * validZ);
+        if (distFromCenter < 12.5) {
+          const angle = Math.atan2(validZ, validX);
+          validX = Math.cos(angle) * 12.5;
+          validZ = Math.sin(angle) * 12.5;
+        }
 
         let hitWall = false;
         for (const wall of innerWallObstacles) {
@@ -428,6 +393,7 @@
       }, 30);
     }
 
+    // 3. 展位生成
     const SLOT_DEFINITIONS = [];
     function generateSlotDefinitions() {
       let slotIdx = 1;
@@ -456,7 +422,6 @@
 
     function initGallerySlots() {
       const container = document.getElementById('gallery-slots');
-      if (!container) return;
       container.innerHTML = '';
 
       SLOT_DEFINITIONS.forEach(slot => {
@@ -535,6 +500,7 @@
       });
     }
 
+    // 4. 登入與上傳
     function openLoginModal() { openModal('login-modal'); }
 
     function submitLogin() {
@@ -617,6 +583,13 @@
       reader.readAsDataURL(fileInput.files[0]);
     }
 
+    // 5. 互動留言與煙火
+    function openInteractiveModal() {
+      const nameInput = document.getElementById('int-name');
+      if (currentUser && !nameInput.value) nameInput.value = currentUser.name;
+      openModal('interactive-modal');
+    }
+
     function submitInteractiveWish() {
       const name = document.getElementById('int-name').value.trim();
       const message = document.getElementById('int-msg').value.trim();
@@ -639,7 +612,7 @@
       triggerFireworks();
       document.getElementById('int-msg').value = '';
       closeModal('interactive-modal');
-      alert('✨ 留言已成功投影至獨立光影大廳牆面！');
+      alert('✨ 留言已成功投影至圓形建築牆面！');
     }
 
     function renderLiveWishes() {
@@ -652,24 +625,26 @@
       localStorage.setItem('YOUTH_ACTIVE_WISHES', JSON.stringify(activeWishes));
 
       activeWishes.forEach((w, index) => {
-        const x = (index % 5) * 6 - 12;
-        const y = Math.floor(index / 5) * 2 - 1;
-        const z = -38;
+        const angle = (index / Math.max(1, activeWishes.length)) * Math.PI * 2;
+        const x = Math.cos(angle) * 11.5;
+        const z = Math.sin(angle) * 11.5;
+        const y = (index % 3) * 1.8 - 1.5;
 
         const wishEntity = document.createElement('a-entity');
         wishEntity.setAttribute('position', `${x} ${y} ${z}`);
+        wishEntity.setAttribute('rotation', `0 ${-angle * (180 / Math.PI) - 90} 0`);
 
         const bgPlane = document.createElement('a-plane');
         bgPlane.setAttribute('color', '#0f172a');
-        bgPlane.setAttribute('width', '5.2');
-        bgPlane.setAttribute('height', '1.6');
+        bgPlane.setAttribute('width', '4.2');
+        bgPlane.setAttribute('height', '1.5');
         bgPlane.setAttribute('material', 'opacity: 0.85;');
 
         const text = document.createElement('a-text');
         text.setAttribute('value', `${w.flower}\n【${w.name}】\n${w.message}`);
         text.setAttribute('align', 'center');
         text.setAttribute('color', w.color);
-        text.setAttribute('width', '6.5');
+        text.setAttribute('width', '5.5');
         text.setAttribute('position', '0 0 0.02');
 
         wishEntity.appendChild(bgPlane);
@@ -684,15 +659,15 @@
       fwContainer.innerHTML = '';
 
       const colors = ['#38bdf8', '#f472b6', '#facc15', '#4ade80', '#ffffff'];
-      for (let i = 0; i < 35; i++) {
+      for (let i = 0; i < 30; i++) {
         const particle = document.createElement('a-sphere');
-        particle.setAttribute('radius', '0.12');
+        particle.setAttribute('radius', '0.1');
         particle.setAttribute('color', colors[Math.floor(Math.random() * colors.length)]);
         particle.setAttribute('position', '0 0 0');
 
         const theta = Math.random() * Math.PI * 2;
         const phi = Math.random() * Math.PI;
-        const speed = Math.random() * 6 + 2;
+        const speed = Math.random() * 5 + 2;
         const vx = Math.sin(phi) * Math.cos(theta) * speed;
         const vy = Math.cos(phi) * speed;
         const vz = Math.sin(phi) * Math.sin(theta) * speed;
@@ -711,6 +686,7 @@
       }
     }
 
+    // 6. 作品彈窗與管理
     function openArtModal(slotId) {
       currentActiveArt = galleryStore[slotId];
       if (!currentActiveArt) return;
