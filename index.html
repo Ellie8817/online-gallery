@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>青年百億圓夢展示區</title>
 
-  <!-- A-Frame 3D 引擎 (使用穩定官方 CDN) -->
+  <!-- A-Frame 3D 引擎 -->
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
 
   <style>
@@ -251,15 +251,15 @@
 
     <a-sky color="#0f172a"></a-sky>
 
-    <!-- 光照 -->
-    <a-entity light="type: ambient; color: #ffffff; intensity: 0.85;"></a-entity>
-    <a-entity light="type: directional; color: #e0f2fe; intensity: 0.5;" position="30 50 30"></a-entity>
+    <!-- 高亮度的全方位光照，徹底解決全黑問題 -->
+    <a-entity light="type: ambient; color: #ffffff; intensity: 1.2;"></a-entity>
+    <a-entity light="type: directional; color: #ffffff; intensity: 0.8;" position="0 50 0"></a-entity>
 
     <!-- 木質地板 -->
     <a-plane id="ground" class="clickable" position="0 0 0" rotation="-90 0 0" width="160" height="160" material="src: #wood-texture; repeat: 32 32; roughness: 0.35;"></a-plane>
 
     <!-- 天花板 -->
-    <a-plane position="0 14 0" rotation="90 0 0" width="160" height="160" color="#0f172a"></a-plane>
+    <a-plane position="0 14 0" rotation="90 0 0" width="160" height="160" color="#1e293b"></a-plane>
 
     <!-- 外圍邊界牆面 -->
     <a-box class="wall-boundary" position="0 7 -80" width="160" height="14" depth="1.5" color="#334155" material="roughness: 0.8;"></a-box>
@@ -286,8 +286,8 @@
     <!-- 動態展位容器 -->
     <a-entity id="gallery-slots"></a-entity>
 
-    <!-- 玩家視角系統 -->
-    <a-entity id="rig" position="0 1.6 65">
+    <!-- 玩家視角系統（初始設置在中央區域 0 1.6 30，由遠到近欣賞展覽，絕不貼牆） -->
+    <a-entity id="rig" position="0 1.6 30">
       <a-entity id="player" camera look-controls="pointerLockEnabled: false" wasd-controls="acceleration: 60; fly: false;">
       </a-entity>
     </a-entity>
@@ -361,7 +361,7 @@
 
     function startCollisionDetection() {
       const rig = document.getElementById('rig');
-      let prevPos = { x: 0, y: 1.6, z: 65 };
+      let prevPos = { x: 0, y: 1.6, z: 30 };
 
       setInterval(() => {
         if (!rig) return;
