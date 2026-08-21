@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的專屬多人線上展覽館</title>
+
+  <!-- 3D 引擎與多人連線套件 -->
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.5.0/socket.io.slim.js"></script>
+  <script src="https://unpkg.com/networked-aframe@^0.8.4/dist/networked-aframe.min.js"></script>
+
+  <style>
+    /* 頁面 UI 樣式 */
+    #ui-container {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      z-index: 999;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      font-family: Arial, sans-serif;
+      width: 280px;
+    }
+    h3 { margin: 0 0 10px 0; font-size: 16px; color: #1e293b; }
+    .btn {
+      background: #2563eb;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    .btn-guide { background: #059669; }
+    .btn:hover { opacity: 0.9; }
+    #file-input { display: none; }
+    
+    #chat-box {
+      margin-top: 10px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 10px;
+    }
+    #chat-messages {
+      height: 90px;
+      overflow-y: auto;
+      background: #f8fafc;
+      font-size: 12px;
+      padding: 6px;
+      margin-bottom: 6px;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+    }
+    .chat-input-group { display: flex; gap: 4px; }
+    #chat-input { flex: 1; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <!-- 控制面板 -->
+  <div id="ui-container">
+    <h3>🎨 專屬線上展覽館</h3>
+    <button class="btn" onclick="document.getElementById('file-input').click()">➕ 上傳作品 (同步全場)</button>
+    <input type="file" id="file-input" accept="image/*" onchange="uploadAndSyncImage(event)">
+    
+    <button class="btn btn-guide" id="guide-btn" onclick="toggleGuideMode()">🚩 開啟 / 取消跟隨導覽</button>
+
+    <!-- 即時聊天視窗 -->
+    <div id="chat-box">
+      <div id="chat-messages"><div><strong>[系統]:</strong> 歡迎來到展覽館！邀請朋友輸入同網址即可一起觀展。</div></div>
+      <div class="chat-input-group">
+        <input type="text" id="chat-input" placeholder="輸入訊息..." onkeydown="if(event.key==='Enter') sendChat()">
+        <button onclick="sendChat()" style="padding: 4px 8px; cursor:pointer;">傳送</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D 連線場景 -->
+  <a-scene networked-scene="
+    room: my-custom-gallery-room;
+    debug: true;
+    adapter: wseasyrtc;
+  ">
+    <a-assets>
+      <!-- 訪客分身範本 -->
+      <template id="avatar-template">
+        <a-entity class="avatar">
+          <a-sphere class="head" color="#3b82f6" radius="0.25" position="0 0.25 0"></a-sphere>
+          <a-sphere color="#ffffff" radius="0.05" position="0.1 0.3 -0.2"></a-sphere>
+          <a-sphere color="#ffffff" radius="0.05" position="-0.1 0.3 -0.2"></a-sphere>
+        </a-entity>
+      </template>
+    </a-assets>
+
+    <!-- 空間環境 -->
+    <a-sky color="#f1f5f9"></a-sky>
+    <a-plane position="0 0 0" rotation="-90 0 0" width="30" height="30" color="#cbd5e1"></a-plane>
+    <!-- 牆面 -->
+    <a-plane position="0 3 -8" width="16" height="6" color="#ffffff"></a-plane>
+    <a-plane position="-8 3 0" rotation="0 90 0" width="16" height="6" color="#f8fafc"></a-plane>
+    <a-plane position="8 3 0" rotation="0 -90 0" width="16" height="6" color="#f8fafc"></a-plane>
+
+    <!-- 動態展品區 -->
+    <a-entity id="gallery-wall"></a-entity>
+
+    <!-- 玩家玩家視角 (WASD 移動 / 滑鼠拖曳) -->
+    <a-entity id="rig" movement-controls position="0 1.6 0">
+      <a-entity id="player"
+        networked="template:#avatar-template;attachTemplateToLocal:false;"
+        camera look-controls wasd-controls>
+      </a-entity>
+    </a-entity>
+  </a-scene>
+
+  <script>
+    let imageCount = 0;
+    let isFollowing = false;
+
+    // 1. 圖片上傳與連線廣播
+    function uploadAndSyncImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageUrl = e.target.result;
+        renderImageOnWall(imageUrl);
+        
+        if (NAF.connection.isConnected()) {
+          NAF.connection.broadcastData('new-image', { url: imageUrl });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 將圖片擺放到展牆上
+    function renderImageOnWall(url) {
+      imageCount++;
+      const galleryWall = document.getElementById('gallery-wall');
+      const newArt = document.createElement('a-image');
+      
+      newArt.setAttribute('src', url);
+      newArt.setAttribute('width', '2.5');
+      newArt.setAttribute('height', '1.8');
+
+      // 依上傳順序掛在正面牆壁
+      const xPos = (imageCount % 2 === 1) ? -3.5 : 3.5;
+      const zPos = -7.9;
+      newArt.setAttribute('position', `${xPos} 3 ${zPos}`);
+
+      galleryWall.appendChild(newArt);
+    }
+
+    // 2. 監聽全場即時廣播事件
+    document.body.addEventListener('connected', function () {
+      // 收到別人上傳圖片
+      NAF.connection.subscribeToData('new-image', (senderId, dataType, data) => {
+        renderImageOnWall(data.url);
+      });
+
+      // 收到聊天訊息
+      NAF.connection.subscribeToData('chat-msg', (senderId, dataType, data) => {
+        appendChatMessage(data.sender, data.text);
+      });
+    });
+
+    // 3. 文字聊天
+    function sendChat() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendChatMessage('我', text);
+      if (NAF.connection.isConnected()) {
+        NAF.connection.broadcastData('chat-msg', { sender: '訪客', text: text });
+      }
+      input.value = '';
+    }
+
+    function appendChatMessage(sender, text) {
+      const msgBox = document.getElementById('chat-messages');
+      const newMsg = document.createElement('div');
+      newMsg.innerHTML = `<strong>${sender}:</strong> ${text}`;
+      msgBox.appendChild(newMsg);
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    // 4. 跟隨導覽模式
+    function toggleGuideMode() {
+      isFollowing = !isFollowing;
+      const btn = document.getElementById('guide-btn');
+      if (isFollowing) {
+        btn.textContent = '❌ 取消跟隨';
+        document.getElementById('rig').setAttribute('position', '0 1.6 -4');
+      } else {
+        btn.textContent = '🚩 開啟 / 取消跟隨導覽';
+        document.getElementById('rig').setAttribute('position', '0 1.6 0');
+      }
+    }
+  </script>
+
+</body>
+</html>
