@@ -3,71 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>青年百億線上展覽館</title>
+  <title>極簡美學線上藝廊</title>
 
-  <!-- 3D 引擎與多人連線套件 -->
+  <!-- A-Frame 3D 引擎與連線套件 -->
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.5.0/socket.io.slim.js"></script>
   <script src="https://unpkg.com/networked-aframe@^0.8.4/dist/networked-aframe.min.js"></script>
 
   <style>
-    body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; overflow: hidden; }
 
-    /* 頂部控制面板 */
-    #ui-container {
+    /* 頂部懸浮極簡導航列 */
+    #navbar {
       position: absolute;
-      top: 15px;
-      left: 15px;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 999;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      width: 290px;
-    }
-    #exhibition-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #0f172a;
-      margin-bottom: 8px;
-      border-bottom: 2px solid #3b82f6;
-      padding-bottom: 4px;
-    }
-    .btn {
-      background: #2563eb;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 10px 24px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
       color: white;
-      padding: 8px 12px;
+    }
+    #exhibition-title { font-size: 16px; font-weight: 600; letter-spacing: 1px; }
+    .btn-action {
+      background: #3b82f6;
+      color: white;
       border: none;
-      border-radius: 6px;
+      padding: 8px 18px;
+      border-radius: 20px;
       cursor: pointer;
-      font-weight: bold;
-      width: 100%;
-      margin-bottom: 8px;
+      font-weight: 500;
+      transition: all 0.2s;
     }
-    .btn-guide { background: #059669; }
-    .btn:hover { opacity: 0.9; }
+    .btn-action:hover { background: #2563eb; transform: scale(1.05); }
     #file-input { display: none; }
-    
-    /* 聊天室 */
-    #chat-box {
-      margin-top: 10px;
-      border-top: 1px solid #e2e8f0;
-      padding-top: 8px;
-    }
-    #chat-messages {
-      height: 80px;
-      overflow-y: auto;
-      background: #f8fafc;
-      font-size: 12px;
-      padding: 6px;
-      margin-bottom: 6px;
-      border-radius: 4px;
-      border: 1px solid #cbd5e1;
-    }
-    .chat-input-group { display: flex; gap: 4px; }
-    #chat-input { flex: 1; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; }
 
-    /* 展品詳情彈窗 Modal */
+    /* 展品互動彈窗 Card Modal */
     #art-modal {
       display: none;
       position: absolute;
@@ -75,115 +53,140 @@
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 1000;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      width: 320px;
-      max-width: 80%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(16px);
+      padding: 24px;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      width: 360px;
+      max-width: 90vw;
     }
-    #art-modal h4 { margin: 0 0 6px 0; color: #1e293b; font-size: 18px; }
-    #art-modal .author { font-size: 13px; color: #64748b; margin-bottom: 12px; }
-    #art-modal .desc { font-size: 14px; color: #334155; line-height: 1.5; white-space: pre-line; }
-    #art-modal .close-btn {
-      margin-top: 15px;
-      background: #64748b;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
+    #art-modal h3 { margin: 0 0 4px 0; color: #0f172a; font-size: 20px; }
+    #art-modal .author { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 12px; }
+    #art-modal .desc { font-size: 14px; color: #334155; line-height: 1.6; margin-bottom: 16px; }
+
+    /* 按讚區塊 */
+    .like-section { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .like-btn {
+      background: #fff0f6;
+      color: #e11d48;
+      border: 1px solid #fecdd3;
+      padding: 6px 14px;
+      border-radius: 16px;
       cursor: pointer;
-      float: right;
+      font-weight: 600;
+    }
+    .like-btn:hover { background: #ffe4e6; }
+
+    /* 留言區塊 */
+    .comments-section { border-top: 1px solid #e2e8f0; padding-top: 12px; }
+    .comments-title { font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 8px; }
+    .comments-list { max-height: 100px; overflow-y: auto; font-size: 13px; color: #334155; margin-bottom: 8px; }
+    .comment-item { background: #f8fafc; padding: 6px 10px; border-radius: 8px; margin-bottom: 4px; }
+    .comment-input-group { display: flex; gap: 6px; }
+    .comment-input-group input { flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
+    
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #94a3b8;
     }
   </style>
 </head>
 <body>
 
-  <!-- 頂部控制面板 -->
-  <div id="ui-container">
-    <div id="exhibition-title">🖼️ 我們的光影線上展覽</div>
-    <button class="btn" onclick="document.getElementById('file-input').click()">➕ 上傳作品與說明</button>
+  <!-- 頂部導覽列 -->
+  <div id="navbar">
+    <div id="exhibition-title">✨ 我的光影個人藝廊</div>
+    <button class="btn-action" onclick="document.getElementById('file-input').click()">➕ 參展 / 上傳作品</button>
     <input type="file" id="file-input" accept="image/*" onchange="handleImageUpload(event)">
-    
-    <button class="btn btn-guide" id="guide-btn" onclick="toggleGuideMode()">🚩 開啟 / 取消跟隨導覽</button>
+  </div>
 
-    <!-- 即時聊天視窗 -->
-    <div id="chat-box">
-      <div id="chat-messages"><div><strong>[系統]:</strong> 點擊展場牆上的照片可查看詳細介紹！</div></div>
-      <div class="chat-input-group">
-        <input type="text" id="chat-input" placeholder="輸入訊息..." onkeydown="if(event.key==='Enter') sendChat()">
-        <button onclick="sendChat()" style="padding: 4px 8px; cursor:pointer;">傳送</button>
+  <!-- 作品詳細資訊與互動視窗 -->
+  <div id="art-modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="modal-title">作品標題</h3>
+    <div class="author" id="modal-author">By 創作者</div>
+    <div class="desc" id="modal-desc">作品理念介紹...</div>
+
+    <!-- 愛心按讚 -->
+    <div class="like-section">
+      <button class="like-btn" onclick="addLike()">❤️ <span id="modal-like-count">0</span> 人喜愛</button>
+    </div>
+
+    <!-- 留言板 -->
+    <div class="comments-section">
+      <div class="comments-title">💬 觀展留言</div>
+      <div class="comments-list" id="modal-comments-list">
+        <div class="comment-item">點擊下方輸入框發表第一條留言吧！</div>
+      </div>
+      <div class="comment-input-group">
+        <input type="text" id="comment-input" placeholder="寫下你的心得..." onkeydown="if(event.key==='Enter') submitComment()">
+        <button class="btn-action" style="padding: 6px 12px;" onclick="submitComment()">送出</button>
       </div>
     </div>
   </div>
 
-  <!-- 展品詳細資訊視窗 -->
-  <div id="art-modal">
-    <h4 id="modal-title">作品標題</h4>
-    <div class="author" id="modal-author">創作者：匿名</div>
-    <div class="desc" id="modal-desc">作品介紹...</div>
-    <button class="close-btn" onclick="closeModal()">關閉</button>
-  </div>
-
-  <!-- 3D 連線場景 -->
-  <a-scene networked-scene="
-    room: my-custom-gallery-room;
-    debug: true;
-    adapter: wseasyrtc;
-  ">
+  <!-- 3D 展覽場景 -->
+  <a-scene networked-scene="room: custom-beauty-gallery; debug: true; adapter: wseasyrtc;">
     <a-assets>
       <template id="avatar-template">
         <a-entity class="avatar">
-          <a-sphere class="head" color="#3b82f6" radius="0.25" position="0 0.25 0"></a-sphere>
-          <a-sphere color="#ffffff" radius="0.05" position="0.1 0.3 -0.2"></a-sphere>
-          <a-sphere color="#ffffff" radius="0.05" position="-0.1 0.3 -0.2"></a-sphere>
+          <a-sphere class="head" color="#60a5fa" radius="0.2" position="0 0.2 0"></a-sphere>
         </a-entity>
       </template>
     </a-assets>
 
-    <!-- 空間環境與牆面 -->
-    <a-sky color="#f1f5f9"></a-sky>
-    <a-plane position="0 0 0" rotation="-90 0 0" width="30" height="30" color="#cbd5e1"></a-plane>
-    <a-plane position="0 3 -8" width="16" height="6" color="#ffffff"></a-plane>
-    <a-plane position="-8 3 0" rotation="0 90 0" width="16" height="6" color="#f8fafc"></a-plane>
-    <a-plane position="8 3 0" rotation="0 -90 0" width="16" height="6" color="#f8fafc"></a-plane>
+    <!-- 質感空間背景 -->
+    <a-sky color="#0f172a"></a-sky>
+    <!-- 木質紋理感的展廳地板 -->
+    <a-plane position="0 0 0" rotation="-90 0 0" width="30" height="30" color="#1e293b"></a-plane>
+    <!-- 展牆與頂部柔光聚光燈質感 -->
+    <a-plane position="0 3.5 -8" width="18" height="7" color="#f8fafc"></a-plane>
+    <a-plane position="-9 3.5 0" rotation="0 90 0" width="16" height="7" color="#f1f5f9"></a-plane>
+    <a-plane position="9 3.5 0" rotation="0 -90 0" width="16" height="7" color="#f1f5f9"></a-plane>
 
-    <!-- 動態展品掛載區 -->
+    <!-- 展品擺放容器 -->
     <a-entity id="gallery-wall"></a-entity>
 
-    <!-- 玩家玩家視角 (含滑鼠點擊 Raycaster 游標) -->
+    <!-- 玩家個人視角與游標點擊線 -->
     <a-entity id="rig" movement-controls position="0 1.6 0">
       <a-entity id="player"
         networked="template:#avatar-template;attachTemplateToLocal:false;"
         camera look-controls wasd-controls>
-        <!-- 畫面中央點擊游標 -->
-        <a-cursor color="#2563eb" radius-inner="0.005" radius-outer="0.01"></a-cursor>
+        <a-cursor color="#38bdf8" radius-inner="0.004" radius-outer="0.008"></a-cursor>
       </a-entity>
     </a-entity>
   </a-scene>
 
   <script>
     let imageCount = 0;
-    let isFollowing = false;
+    let currentArtData = null; // 當前打開的作品資料
+    let currentArtEntity = null; // 當前作品的 3D 元件
+    const galleryStore = {}; // 儲存所有展品動態資料
 
-    // 1. 處理照片上傳與輸入介紹資料
+    // 1. 處理照片上傳
     function handleImageUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
 
-      // 跳出提示框讓使用者輸入作品資訊
       const title = prompt("請輸入作品名稱：", "無題") || "無題";
       const author = prompt("請輸入創作者姓名：", "匿名") || "匿名";
-      const desc = prompt("請輸入作品介紹/創作理念：", "暫無介紹。") || "暫無介紹。";
+      const desc = prompt("請輸入作品介紹：", "暫無介紹。") || "暫无介紹。";
 
       const reader = new FileReader();
       reader.onload = function(e) {
-        const imageUrl = e.target.result;
-        const artData = { url: imageUrl, title, author, desc };
+        const id = 'art_' + Date.now();
+        const artData = { id, url: e.target.result, title, author, desc, likes: 0, comments: [] };
         
+        galleryStore[id] = artData;
         renderImageOnWall(artData);
 
-        // NAF 連線廣播給所有人
         if (NAF.connection.isConnected()) {
           NAF.connection.broadcastData('new-image', artData);
         }
@@ -191,49 +194,61 @@
       reader.readAsDataURL(file);
     }
 
-    // 2. 將作品與說明卡掛載到 3D 牆上
+    // 2. 渲染 3D 展牆上的作品與精美畫框
     function renderImageOnWall(data) {
       imageCount++;
       const galleryWall = document.getElementById('gallery-wall');
-      
-      // 建立畫框容器
       const artEntity = document.createElement('a-entity');
+      artEntity.setAttribute('id', data.id);
 
-      // 計算牆面掛載位置
-      const xPos = (imageCount % 2 === 1) ? -3.5 : 3.5;
-      const zPos = -7.8;
-      artEntity.setAttribute('position', `${xPos} 3 ${zPos}`);
+      const xPos = (imageCount % 2 === 1) ? -4 : 4;
+      const zPos = -7.85;
+      artEntity.setAttribute('position', `${xPos} 3.5 ${zPos}`);
 
-      // 2D 照片本體
+      // 外畫框 (黑色簡約質感)
+      const border = document.createElement('a-plane');
+      border.setAttribute('color', '#0f172a');
+      border.setAttribute('width', '2.7');
+      border.setAttribute('height', '2.0');
+      border.setAttribute('position', '0 0 -0.01');
+
+      // 畫作照片
       const img = document.createElement('a-image');
       img.setAttribute('src', data.url);
       img.setAttribute('width', '2.5');
       img.setAttribute('height', '1.8');
 
-      // 照片下方的 3D 展牌說明 (呈現作品名與創作者)
+      // 立體簡約說明牌
       const label = document.createElement('a-text');
       label.setAttribute('value', `${data.title}\nBy ${data.author}`);
       label.setAttribute('align', 'center');
-      label.setAttribute('color', '#334155');
+      label.setAttribute('color', '#475569');
       label.setAttribute('width', '3');
-      label.setAttribute('position', '0 -1.1 0.05');
+      label.setAttribute('position', '0 -1.25 0.05');
 
+      artEntity.appendChild(border);
       artEntity.appendChild(img);
       artEntity.appendChild(label);
 
-      // 點擊作品跳出詳細介紹卡片
+      // 點擊作品打開點讚留言彈窗
       artEntity.addEventListener('click', function () {
-        showModal(data.title, data.author, data.desc);
+        openModal(data.id);
       });
 
       galleryWall.appendChild(artEntity);
     }
 
-    // 3. 彈窗 Modal 控制
-    function showModal(title, author, desc) {
-      document.getElementById('modal-title').textContent = title;
-      document.getElementById('modal-author').textContent = `創作者：${author}`;
-      document.getElementById('modal-desc').textContent = desc;
+    // 3. 打開互動彈窗
+    function openModal(artId) {
+      currentArtData = galleryStore[artId];
+      if (!currentArtData) return;
+
+      document.getElementById('modal-title').textContent = currentArtData.title;
+      document.getElementById('modal-author').textContent = `By ${currentArtData.author}`;
+      document.getElementById('modal-desc').textContent = currentArtData.desc;
+      document.getElementById('modal-like-count').textContent = currentArtData.likes || 0;
+
+      updateCommentsUI();
       document.getElementById('art-modal').style.display = 'block';
     }
 
@@ -241,50 +256,77 @@
       document.getElementById('art-modal').style.display = 'none';
     }
 
-    // 4. 連線廣播監聽
+    // 4. 按讚與留言功能實作
+    function addLike() {
+      if (!currentArtData) return;
+      currentArtData.likes = (currentArtData.likes || 0) + 1;
+      document.getElementById('modal-like-count').textContent = currentArtData.likes;
+
+      // 廣播給所有人同步按讚數
+      if (NAF.connection.isConnected()) {
+        NAF.connection.broadcastData('update-like', { id: currentArtData.id, likes: currentArtData.likes });
+      }
+    }
+
+    function submitComment() {
+      const input = document.getElementById('comment-input');
+      const text = input.value.trim();
+      if (!text || !currentArtData) return;
+
+      if (!currentArtData.comments) currentArtData.comments = [];
+      currentArtData.comments.push(text);
+      
+      updateCommentsUI();
+      input.value = '';
+
+      // 廣播給所有人同步留言
+      if (NAF.connection.isConnected()) {
+        NAF.connection.broadcastData('update-comment', { id: currentArtData.id, comment: text });
+      }
+    }
+
+    function updateCommentsUI() {
+      const list = document.getElementById('modal-comments-list');
+      list.innerHTML = '';
+      if (!currentArtData.comments || currentArtData.comments.length === 0) {
+        list.innerHTML = '<div class="comment-item">尚無留言，快來搶首則留言！</div>';
+        return;
+      }
+      currentArtData.comments.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'comment-item';
+        item.textContent = c;
+        list.appendChild(item);
+      });
+      list.scrollTop = list.scrollHeight;
+    }
+
+    // 5. 監聽連線廣播，同步數據
     document.body.addEventListener('connected', function () {
       NAF.connection.subscribeToData('new-image', (senderId, dataType, data) => {
+        galleryStore[data.id] = data;
         renderImageOnWall(data);
       });
 
-      NAF.connection.subscribeToData('chat-msg', (senderId, dataType, data) => {
-        appendChatMessage(data.sender, data.text);
+      NAF.connection.subscribeToData('update-like', (senderId, dataType, data) => {
+        if (galleryStore[data.id]) {
+          galleryStore[data.id].likes = data.likes;
+          if (currentArtData && currentArtData.id === data.id) {
+            document.getElementById('modal-like-count').textContent = data.likes;
+          }
+        }
+      });
+
+      NAF.connection.subscribeToData('update-comment', (senderId, dataType, data) => {
+        if (galleryStore[data.id]) {
+          if (!galleryStore[data.id].comments) galleryStore[data.id].comments = [];
+          galleryStore[data.id].comments.push(data.comment);
+          if (currentArtData && currentArtData.id === data.id) {
+            updateCommentsUI();
+          }
+        }
       });
     });
-
-    // 5. 文字聊天
-    function sendChat() {
-      const input = document.getElementById('chat-input');
-      const text = input.value.trim();
-      if (!text) return;
-
-      appendChatMessage('我', text);
-      if (NAF.connection.isConnected()) {
-        NAF.connection.broadcastData('chat-msg', { sender: '訪客', text: text });
-      }
-      input.value = '';
-    }
-
-    function appendChatMessage(sender, text) {
-      const msgBox = document.getElementById('chat-messages');
-      const newMsg = document.createElement('div');
-      newMsg.innerHTML = `<strong>${sender}:</strong> ${text}`;
-      msgBox.appendChild(newMsg);
-      msgBox.scrollTop = msgBox.scrollHeight;
-    }
-
-    // 6. 導覽模式
-    function toggleGuideMode() {
-      isFollowing = !isFollowing;
-      const btn = document.getElementById('guide-btn');
-      if (isFollowing) {
-        btn.textContent = '❌ 取消跟隨';
-        document.getElementById('rig').setAttribute('position', '0 1.6 -4');
-      } else {
-        btn.textContent = '🚩 開啟 / 取消跟隨導覽';
-        document.getElementById('rig').setAttribute('position', '0 1.6 0');
-      }
-    }
   </script>
 
 </body>
