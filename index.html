@@ -245,18 +245,17 @@
   <!-- 3D 展覽場景 -->
   <a-scene embedded raycaster="objects: .clickable">
     <a-assets>
-      <canvas id="wood-texture" width="512" height="512"></canvas>
       <audio id="bgm-1" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=soft-piano-100-bpm-121529.mp3" preload="auto"></audio>
     </a-assets>
 
     <a-sky color="#0f172a"></a-sky>
 
-    <!-- 高亮度的全方位光照，徹底解決全黑問題 -->
+    <!-- 高亮度的全方位光照 -->
     <a-entity light="type: ambient; color: #ffffff; intensity: 1.2;"></a-entity>
     <a-entity light="type: directional; color: #ffffff; intensity: 0.8;" position="0 50 0"></a-entity>
 
-    <!-- 木質地板 -->
-    <a-plane id="ground" class="clickable" position="0 0 0" rotation="-90 0 0" width="160" height="160" material="src: #wood-texture; repeat: 32 32; roughness: 0.35;"></a-plane>
+    <!-- 典雅木質色調地板（修正相依問題，確保流暢載入） -->
+    <a-plane id="ground" class="clickable" position="0 0 0" rotation="-90 0 0" width="160" height="160" color="#784d33" material="roughness: 0.4;"></a-plane>
 
     <!-- 天花板 -->
     <a-plane position="0 14 0" rotation="90 0 0" width="160" height="160" color="#1e293b"></a-plane>
@@ -286,7 +285,7 @@
     <!-- 動態展位容器 -->
     <a-entity id="gallery-slots"></a-entity>
 
-    <!-- 玩家視角系統（初始設置在中央區域 0 1.6 30，由遠到近欣賞展覽，絕不貼牆） -->
+    <!-- 玩家視角系統（中央區域 0 1.6 30，由遠到近欣賞展覽，絕不貼牆） -->
     <a-entity id="rig" position="0 1.6 30">
       <a-entity id="player" camera look-controls="pointerLockEnabled: false" wasd-controls="acceleration: 60; fly: false;">
       </a-entity>
@@ -296,21 +295,6 @@
   </a-scene>
 
   <script>
-    // 0. 生成木質地板紋理
-    function generateWoodTexture() {
-      const canvas = document.getElementById('wood-texture');
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#85583b';
-      ctx.fillRect(0, 0, 512, 512);
-
-      const plankHeight = 64;
-      for (let y = 0; y < 512; y += plankHeight) {
-        ctx.fillStyle = (y / plankHeight) % 2 === 0 ? '#784d33' : '#6b432c';
-        ctx.fillRect(0, y, 512, plankHeight - 2);
-      }
-    }
-    generateWoodTexture();
-
     // 1. 狀態管理
     let currentUser = JSON.parse(localStorage.getItem('YOUTH_GALLERY_USER') || 'null');
     const galleryStore = JSON.parse(localStorage.getItem('YOUTH_GALLERY_STORE') || '{}');
