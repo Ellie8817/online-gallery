@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>青年百億圓夢計劃 - PhotoVogue 沉浸式高畫質藝廊</title>
+  <title>青年百億圓夢計劃 - 夢想微光 PhotoVogue 沉浸展廳</title>
 
   <!-- A-Frame 3D 引擎與連線套件 -->
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
@@ -11,7 +11,7 @@
   <script src="https://unpkg.com/networked-aframe@^0.8.4/dist/networked-aframe.min.js"></script>
 
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; overflow: hidden; background: #0b0f19; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; overflow: hidden; background: #050811; }
 
     /* 隱藏預設游標 */
     .a-canvas { cursor: default !important; }
@@ -20,115 +20,132 @@
     /* 入場沉浸式遮罩 */
     #welcome-overlay {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(11, 15, 25, 0.96); backdrop-filter: blur(20px); z-index: 9999;
+      background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+      backdrop-filter: blur(20px); z-index: 9999;
       display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center;
     }
-    #welcome-overlay h1 { font-size: 28px; font-weight: 300; letter-spacing: 3px; margin-bottom: 8px; }
-    #welcome-overlay p { font-size: 14px; color: #94a3b8; margin-bottom: 24px; }
+    #welcome-overlay .dream-subtitle { font-size: 13px; letter-spacing: 6px; color: #38bdf8; text-transform: uppercase; margin-bottom: 12px; }
+    #welcome-overlay h1 { font-size: 32px; font-weight: 300; letter-spacing: 4px; margin: 0 0 12px 0; background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    #welcome-overlay p { font-size: 14px; color: #94a3b8; max-width: 460px; line-height: 1.8; margin-bottom: 24px; }
     .btn-enter {
-      background: #ffffff; color: #0f172a; border: none; padding: 12px 36px; border-radius: 30px;
-      font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
+      background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%); color: #ffffff; border: none; padding: 14px 42px; border-radius: 30px;
+      font-size: 15px; font-weight: 600; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(56, 189, 248, 0.3);
     }
-    .btn-enter:hover { transform: scale(1.05); background: #f1f5f9; }
+    .btn-enter:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 15px 35px rgba(56, 189, 248, 0.5); }
 
-    /* 頂部導覽列 */
+    /* 操作提示面板 */
+    #nav-instructions {
+      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 999;
+      background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 20px; border-radius: 20px; color: #e2e8f0; font-size: 12px; pointer-events: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4); text-align: center;
+    }
+
+    /* 頂部極簡導覽列 */
     #navbar {
       position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999;
-      background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 10px 24px; border-radius: 40px; display: flex; align-items: center; gap: 16px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 8px 24px; border-radius: 40px; display: flex; align-items: center; gap: 16px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    #exhibition-title { font-size: 14px; font-weight: 500; letter-spacing: 1px; }
+    #exhibition-title { font-size: 14px; font-weight: 500; letter-spacing: 1.5px; }
 
     .nav-btn {
-      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white;
+      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #f8fafc;
       padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;
     }
-    .nav-btn:hover { background: rgba(255, 255, 255, 0.25); }
+    .nav-btn:hover { background: rgba(255, 255, 255, 0.2); }
 
-    /* 音樂與身分狀態標籤 */
     #user-badge { font-size: 12px; color: #38bdf8; font-weight: 600; }
 
     /* 通用 Modal 彈窗樣式 */
     .modal-panel {
       display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;
-      background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(16px); padding: 24px; border-radius: 20px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4); width: 440px; max-width: 90vw; max-height: 85vh; overflow-y: auto;
+      background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 28px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); width: 440px; max-width: 90vw; max-height: 85vh; overflow-y: auto; color: white;
     }
-    .modal-panel h3 { margin: 0 0 12px 0; color: #0f172a; font-size: 20px; }
-    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; }
+    .modal-panel h3 { margin: 0 0 12px 0; color: #f8fafc; font-size: 20px; font-weight: 500; }
+    .modal-close { position: absolute; top: 18px; right: 20px; background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; }
 
     /* 表單輸入 */
-    .form-group { margin-bottom: 12px; text-align: left; }
-    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px; }
+    .form-group { margin-bottom: 14px; text-align: left; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 6px; }
     .form-group input, .form-group textarea {
-      width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;
+      width: 100%; box-sizing: border-box; padding: 10px 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px; font-size: 13px; color: white; outline: none; transition: border-color 0.2s;
     }
+    .form-group input:focus, .form-group textarea:focus { border-color: #38bdf8; }
 
     /* 作品詳細點擊彈窗 */
-    #art-modal .project-no { font-size: 12px; color: #2563eb; font-weight: 700; margin-bottom: 2px; }
-    #art-modal .author { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 12px; }
-    #art-modal .desc { font-size: 14px; color: #334155; line-height: 1.6; margin-bottom: 16px; }
+    #art-modal .project-no { font-size: 12px; color: #38bdf8; font-weight: 700; margin-bottom: 4px; }
+    #art-modal .author { font-size: 13px; color: #94a3b8; font-weight: 500; margin-bottom: 14px; }
+    #art-modal .desc { font-size: 14px; color: #e2e8f0; line-height: 1.7; margin-bottom: 16px; }
 
-    .image-preview-container { width: 100%; text-align: center; margin-bottom: 12px; }
+    .image-preview-container { width: 100%; text-align: center; margin-bottom: 14px; }
     .image-preview-container img {
       max-width: 100%; max-height: 300px; border-radius: 12px; object-fit: contain; cursor: zoom-in;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5); transition: transform 0.2s;
     }
     .image-preview-container img:hover { transform: scale(1.02); }
 
-    .btn-danger { background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 12px; margin-top: 10px; width: 100%; }
+    .btn-danger { background: #ef4444; color: white; border: none; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 12px; margin-top: 10px; width: 100%; }
     .btn-danger:hover { background: #dc2626; }
 
     /* 觀看留言區 */
-    .comments-section { border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 12px; }
-    .comments-title { font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 8px; }
-    .comments-list { max-height: 100px; overflow-y: auto; font-size: 13px; color: #334155; margin-bottom: 8px; }
-    .comment-item { background: #f8fafc; padding: 6px 10px; border-radius: 8px; margin-bottom: 4px; }
-    .comment-input-group { display: flex; gap: 6px; }
-    .comment-input-group input { flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; }
+    .comments-section { border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 14px; margin-top: 14px; }
+    .comments-title { font-weight: 600; font-size: 13px; color: #cbd5e1; margin-bottom: 10px; }
+    .comments-list { max-height: 110px; overflow-y: auto; font-size: 13px; color: #e2e8f0; margin-bottom: 10px; }
+    .comment-item { background: rgba(255, 255, 255, 0.05); padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; border: 1px solid rgba(255, 255, 255, 0.05); }
+    .comment-input-group { display: flex; gap: 8px; }
+    .comment-input-group input { flex: 1; padding: 8px 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white; }
 
     /* 全螢幕大圖燈箱 */
     #full-lightbox {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center;
     }
-    #full-lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 8px; box-shadow: 0 0 40px rgba(255,255,255,0.2); object-fit: contain; }
+    #full-lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 8px; box-shadow: 0 0 50px rgba(56, 189, 248, 0.2); object-fit: contain; }
     #full-lightbox .close-lightbox { position: absolute; top: 20px; right: 30px; color: white; font-size: 36px; cursor: pointer; }
 
     /* 後台紀錄視窗 (Admin Dashboard) */
-    #admin-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px; }
-    #admin-table th, #admin-table td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }
-    #admin-table th { background: #f1f5f9; color: #334155; }
+    #admin-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 12px; color: #e2e8f0; }
+    #admin-table th, #admin-table td { border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px; text-align: left; }
+    #admin-table th { background: rgba(255, 255, 255, 0.05); color: #38bdf8; }
   </style>
 </head>
 <body>
 
   <!-- 入場沉浸體驗遮罩 -->
   <div id="welcome-overlay">
+    <div class="dream-subtitle">YOUTH DREAM FUND EXHIBITION</div>
     <h1>青年百億圓夢計劃 成果展</h1>
-    <p>PhotoVogue 沉浸式 3D 展廳 ｜ 無聲光干擾藝術空間</p>
-    <button class="btn-enter" onclick="enterGallery()">進入展廳與開啟音樂</button>
+    <p>踏入廣闊的「夢想極光」PhotoVogue 藝廊。<br>點擊地面即可點對點傳送移動，拖曳滑鼠轉動視角。</p>
+    <button class="btn-enter" onclick="enterGallery()">開啟音樂並踏入展廳</button>
   </div>
 
   <!-- 頂部導覽列 -->
   <div id="navbar">
-    <div id="exhibition-title">✨ PhotoVogue 展區</div>
+    <div id="exhibition-title">✨ PhotoVogue 夢想極光展區</div>
     <div id="user-badge">👤 觀賞者（未登入）</div>
     <button class="nav-btn" id="login-nav-btn" onclick="openLoginModal()">策展人登入</button>
     <button class="nav-btn" onclick="toggleMusic()" id="music-btn">🎵 音樂：播放中</button>
     <button class="nav-btn" onclick="openAdminModal()">📊 後台紀錄</button>
   </div>
 
+  <!-- 底部操作指示語 -->
+  <div id="nav-instructions">
+    🖱️ <b>滑鼠拖曳</b>：轉動視角 ｜ 🎯 <b>點擊地面／展位</b>：自動移動傳送 ｜ ⌨️ <b>WASD / 鍵盤方向鍵</b>：輔助平移
+  </div>
+
   <!-- 1. 策展人登入 Modal -->
   <div id="login-modal" class="modal-panel">
     <button class="modal-close" onclick="closeModal('login-modal')">✕</button>
     <h3>策展人登入驗證</h3>
-    <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">請建立策展資料以獲得作品上傳與個人管理權限（每人限上傳 3 張作品）。</p>
+    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">請建立策展資料以獲得作品上傳與個人管理權限（每人限上傳 3 張作品）。</p>
     <div class="form-group"><label>策展人姓名 *</label><input type="text" id="reg-name" placeholder="請輸入姓名"></div>
     <div class="form-group"><label>參加計畫名稱 *</label><input type="text" id="reg-program" placeholder="例如：青年百億圓夢計畫"></div>
     <div class="form-group"><label>梯次 *</label><input type="text" id="reg-batch" placeholder="例如：2026 第一期"></div>
     <div class="form-group"><label>計畫代號 *</label><input type="text" id="reg-code" placeholder="例如：PROJ-2026-A1"></div>
-    <button class="btn-enter" style="width: 100%; border-radius: 12px; margin-top: 10px; background: #0f172a; color: white;" onclick="submitLogin()">完成認證並登入</button>
+    <button class="btn-enter" style="width: 100%; border-radius: 12px; margin-top: 10px;" onclick="submitLogin()">完成認證並登入</button>
   </div>
 
   <!-- 2. 上傳作品 Modal -->
@@ -136,21 +153,21 @@
     <button class="modal-close" onclick="closeModal('upload-modal')">✕</button>
     <h3>上傳策展作品</h3>
     <div class="form-group"><label>作品名稱 *</label><input type="text" id="up-title" placeholder="請輸入作品名稱"></div>
-    <div class="form-group"><label>作品簡述</label><textarea id="up-desc" rows="3" placeholder="簡述這張照片背後的故事..."></textarea></div>
+    <div class="form-group"><label>作品簡述</label><textarea id="up-desc" rows="3" placeholder="簡述這張照片背後的故事與夢想..."></textarea></div>
     <div class="form-group"><label>選擇照片原圖 (不強制裁切) *</label><input type="file" id="up-file" accept="image/*"></div>
-    <button class="btn-enter" style="width: 100%; border-radius: 12px; margin-top: 10px; background: #2563eb; color: white;" onclick="confirmUpload()">發布至指定展位</button>
+    <button class="btn-enter" style="width: 100%; border-radius: 12px; margin-top: 10px;" onclick="confirmUpload()">發布至指定展位</button>
   </div>
 
   <!-- 3. 作品詳細內容 Modal -->
   <div id="art-modal" class="modal-panel">
     <button class="modal-close" onclick="closeModal('art-modal')">✕</button>
-    <div class="project-no" id="modal-project-no">計畫代號：PROJ-2026-A1 (梯次)</div>
+    <div class="project-no" id="modal-project-no">計畫代號：PROJ-2026-A1</div>
     <h3 id="modal-title" style="margin-top: 4px;">作品名稱</h3>
     <div class="author" id="modal-author">創作者名單</div>
     
     <div class="image-preview-container">
       <img id="modal-img-preview" src="" alt="作品原圖" onclick="openLightbox()">
-      <div style="font-size: 11px; color: #64748b; margin-top: 4px;">🔍 點擊圖片開啟高清原圖檢視</div>
+      <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">🔍 點擊圖片開啟高清原圖檢視</div>
     </div>
 
     <div class="desc" id="modal-desc">作品介紹...</div>
@@ -198,52 +215,64 @@
     <img id="lightbox-img" src="" alt="高解析原圖">
   </div>
 
-  <!-- 3D 展覽場景 (50+ 照片專屬大型 PhotoVogue 藝廊) -->
-  <a-scene networked-scene="room: photovogue-grand-gallery-v3; debug: true; adapter: wseasyrtc;" raycaster="objects: .clickable">
+  <!-- 3D 展覽場景 (夢想極光與點擊傳送風格) -->
+  <a-scene networked-scene="room: photovogue-aurora-gallery-v5; debug: true; adapter: wseasyrtc;" raycaster="objects: .clickable">
     
     <a-assets>
       <template id="avatar-template">
         <a-entity class="avatar">
-          <a-sphere class="head" color="#60a5fa" radius="0.2" position="0 0.2 0"></a-sphere>
+          <a-sphere class="head" color="#38bdf8" radius="0.2" position="0 0.2 0"></a-sphere>
         </a-entity>
       </template>
 
-      <!-- 多首無版權優雅純音樂 (無人聲輪播) -->
+      <!-- 無版權優雅樂曲輪播 -->
       <audio id="bgm-1" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=soft-piano-100-bpm-121529.mp3" preload="auto"></audio>
       <audio id="bgm-2" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a7315b.mp3?filename=relaxing-piano-10267.mp3" preload="auto"></audio>
       <audio id="bgm-3" src="https://cdn.pixabay.com/download/audio/2022/11/06/audio_c1871a3915.mp3?filename=gentle-piano-ambient-126241.mp3" preload="auto"></audio>
     </a-assets>
 
-    <!-- 展廳天空與照明 -->
-    <a-sky color="#0d1117"></a-sky>
+    <!-- 1. 夢想極光色彩天空背景 (Gradient Sky) -->
+    <a-sky color="#030712"></a-sky>
 
-    <!-- 木質高級地板 (40m x 40m 大型藝廊) -->
-    <a-plane position="0 0 0" rotation="-90 0 0" width="44" height="44" color="#a37e58" material="roughness: 0.25; metalness: 0.1"></a-plane>
-    <!-- 天花板 -->
-    <a-plane position="0 8 0" rotation="90 0 0" width="44" height="44" color="#111827"></a-plane>
+    <!-- 天空背景藝術幾何極光雲彩 (Aurora Clouds) -->
+    <a-plane position="0 25 -40" width="120" height="40" color="#0284c7" material="shader: flat; opacity: 0.12; transparent: true;"></a-plane>
+    <a-plane position="0 20 -40" width="100" height="30" color="#6366f1" material="shader: flat; opacity: 0.15; transparent: true;"></a-plane>
+    <a-plane position="0 15 -40" width="80" height="20" color="#a855f7" material="shader: flat; opacity: 0.18; transparent: true;"></a-plane>
 
-    <!-- 外圍四周展牆 -->
-    <a-plane position="0 4 -20" width="40" height="8" color="#f8fafc"></a-plane>
-    <a-plane position="0 4 20" rotation="0 180 0" width="40" height="8" color="#f8fafc"></a-plane>
-    <a-plane position="-20 4 0" rotation="0 90 0" width="40" height="8" color="#f8fafc"></a-plane>
-    <a-plane position="20 4 0" rotation="0 -90 0" width="40" height="8" color="#f8fafc"></a-plane>
+    <!-- 2. 超廣闊地磚 (60m x 60m 空間，點擊即可進行 Teleport 點對點移動) -->
+    <a-plane id="ground" class="clickable" position="0 0 0" rotation="-90 0 0" width="60" height="60" color="#0b1329" material="roughness: 0.1; metalness: 0.4"></a-plane>
+    
+    <!-- 地板幾何科技光軌網格 -->
+    <a-plane position="0 0.01 0" rotation="-90 0 0" width="58" height="58" color="#1e293b" material="wireframe: true; wireframeLinewidth: 1; opacity: 0.25; transparent: true;"></a-plane>
 
-    <!-- 中央經典 PhotoVogue 旋轉雙面屏風牆 (不可穿透，只能正面觀賞) -->
-    <!-- 中央屏風 A -->
-    <a-box class="obstacle" position="-8 4 -6" rotation="0 20 0" width="0.2" height="7" depth="12" color="#0f172a"></a-box>
-    <!-- 中央屏風 B -->
-    <a-box class="obstacle" position="8 4 -6" rotation="0 -20 0" width="0.2" height="7" depth="12" color="#0f172a"></a-box>
-    <!-- 中央屏風 C -->
-    <a-box class="obstacle" position="-8 4 8" rotation="0 -15 0" width="0.2" height="7" depth="12" color="#0f172a"></a-box>
-    <!-- 中央屏風 D -->
-    <a-box class="obstacle" position="8 4 8" rotation="0 15 0" width="0.2" height="7" depth="12" color="#0f172a"></a-box>
+    <!-- 天花板 (格柵暗色設計) -->
+    <a-plane position="0 10 0" rotation="90 0 0" width="60" height="60" color="#020617"></a-plane>
+
+    <!-- 3. 超廣闊外圍牆面 (60m x 60m)，設有實體防穿透阻擋區 -->
+    <a-box class="obstacle" position="0 5 -30" width="60" height="10" depth="1" color="#0f172a"></a-box>
+    <a-box class="obstacle" position="0 5 30" width="60" height="10" depth="1" color="#0f172a"></a-box>
+    <a-box class="obstacle" position="-30 5 0" width="1" height="10" depth="60" color="#0f172a"></a-box>
+    <a-box class="obstacle" position="20 5 0" width="1" height="10" depth="60" color="#0f172a"></a-box>
+
+    <!-- 4. 中央 PhotoVogue 經典黑金屬質感雙面屏風牆 (實體阻擋，不可穿透) -->
+    <a-box class="obstacle" position="-12 5 -10" rotation="0 20 0" width="0.4" height="9" depth="18" color="#1e1b4b" material="metalness: 0.8; roughness: 0.2"></a-box>
+    <a-box class="obstacle" position="12 5 -10" rotation="0 -20 0" width="0.4" height="9" depth="18" color="#1e1b4b" material="metalness: 0.8; roughness: 0.2"></a-box>
+    <a-box class="obstacle" position="-12 5 12" rotation="0 -15 0" width="0.4" height="9" depth="18" color="#1e1b4b" material="metalness: 0.8; roughness: 0.2"></a-box>
+    <a-box class="obstacle" position="12 5 12" rotation="0 15 0" width="0.4" height="9" depth="18" color="#1e1b4b" material="metalness: 0.8; roughness: 0.2"></a-box>
+
+    <!-- 5. 夢想裝飾藝術（幾何光環與漂浮星粒子） -->
+    <a-torus position="0 8.5 0" rotation="90 0 0" radius="6" radius-tubular="0.04" color="#38bdf8" material="shader: flat; opacity: 0.85; transparent: true;"></a-torus>
+    <a-torus position="0 8.2 0" rotation="90 0 0" radius="6.4" radius-tubular="0.02" color="#818cf8" material="shader: flat; opacity: 0.6; transparent: true;"></a-torus>
+
+    <!-- 幾何微光粒子 -->
+    <a-entity id="dream-particles"></a-entity>
 
     <!-- 動態展位與燈光容器 -->
     <a-entity id="gallery-slots"></a-entity>
 
-    <!-- 玩家視角與移動（設有移動範圍限制） -->
-    <a-entity id="rig" movement-controls position="0 1.6 15">
-      <a-entity id="player" camera look-controls="pointerLockEnabled: false" wasd-controls>
+    <!-- 6. 玩家視角與滑鼠/點擊移動控制系統 -->
+    <a-entity id="rig" position="0 1.6 22">
+      <a-entity id="player" camera look-controls="pointerLockEnabled: false" wasd-controls="acceleration: 45">
       </a-entity>
     </a-entity>
 
@@ -266,6 +295,8 @@
       document.getElementById('welcome-overlay').style.display = 'none';
       playBGM();
       updateUserUI();
+      createDreamParticles();
+      setupClickTeleport();
     }
 
     function playBGM() {
@@ -295,48 +326,123 @@
       }
     }
 
-    // 3. 自動生成 52 個展位座標 (包含四周牆面與中央雙面屏風，均為正面視角)
+    // 3. 滑鼠點擊地面自動傳送 (Teleport) 與邊界範圍防穿牆限制
+    const BOUNDS = { minX: -28, maxX: 28, minZ: -28, maxZ: 28 };
+
+    function setupClickTeleport() {
+      const ground = document.getElementById('ground');
+      const rig = document.getElementById('rig');
+
+      ground.addEventListener('click', (evt) => {
+        if (!evt.detail || !evt.detail.intersection) return;
+        const pt = evt.detail.intersection.point;
+
+        // 嚴格邊界檢查，確保不越牆
+        let targetX = Math.max(BOUNDS.minX, Math.min(BOUNDS.maxX, pt.x));
+        let targetZ = Math.max(BOUNDS.minZ, Math.min(BOUNDS.maxZ, pt.z));
+
+        // 碰撞區域避障（中央四座屏風牆防穿越）
+        if (isInsideObstacle(targetX, targetZ)) {
+          return; // 若點擊障礙物內部則忽略傳送
+        }
+
+        // 平滑漸進移動至點擊點
+        smoothTeleport(rig, targetX, targetZ);
+      });
+    }
+
+    function isInsideObstacle(x, z) {
+      // 判斷是否點擊到中央屏風碰撞區
+      if (x > -16 && x < -8 && z > -15 && z < -5) return true;
+      if (x > 8 && x < 16 && z > -15 && z < -5) return true;
+      if (x > -16 && x < -8 && z > 5 && z < 18) return true;
+      if (x > 8 && x < 16 && z > 5 && z < 18) return true;
+      return false;
+    }
+
+    function smoothTeleport(rig, targetX, targetZ) {
+      const startPos = rig.getAttribute('position');
+      const startTime = performance.now();
+      const duration = 400; // 400ms 動畫傳送
+
+      function animate(time) {
+        const elapsed = time - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+
+        const currX = startPos.x + (targetX - startPos.x) * ease;
+        const currZ = startPos.z + (targetZ - startPos.z) * ease;
+
+        rig.setAttribute('position', `${currX} 1.6 ${currZ}`);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    // 4. 動態產生夢想氣氛微光粒子
+    function createDreamParticles() {
+      const container = document.getElementById('dream-particles');
+      for (let i = 0; i < 36; i++) {
+        const sphere = document.createElement('a-sphere');
+        const x = (Math.random() - 0.5) * 48;
+        const y = 1.5 + Math.random() * 6.5;
+        const z = (Math.random() - 0.5) * 48;
+        const radius = 0.04 + Math.random() * 0.06;
+
+        sphere.setAttribute('position', `${x} ${y} ${z}`);
+        sphere.setAttribute('radius', radius.toString());
+        sphere.setAttribute('color', Math.random() > 0.5 ? '#38bdf8' : '#c084fc');
+        sphere.setAttribute('material', 'shader: flat; opacity: 0.65; transparent: true;');
+        container.appendChild(sphere);
+      }
+    }
+
+    // 5. 自動生成 52 個展位座標 (包含廣闊外圍牆面與中央雙面屏風)
     const SLOT_DEFINITIONS = [];
 
     function generateSlotDefinitions() {
       let slotIdx = 1;
 
-      // 外圍 North 牆 (10 個展位)
-      for (let x = -18; x <= 18; x += 4) {
-        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `${x} 4 -19.8`, rot: '0 0 0' });
+      // 60m 廣闊外圍 North 牆 (10 個展位)
+      for (let x = -22; x <= 22; x += 5) {
+        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `${x} 4.5 -29.2`, rot: '0 0 0' });
       }
       // 外圍 South 牆 (10 個展位)
-      for (let x = -18; x <= 18; x += 4) {
-        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `${x} 4 19.8`, rot: '0 180 0' });
+      for (let x = -22; x <= 22; x += 5) {
+        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `${x} 4.5 29.2`, rot: '0 180 0' });
       }
       // 外圍 West 牆 (10 個展位)
-      for (let z = -18; z <= 18; z += 4) {
-        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `-19.8 4 ${z}`, rot: '0 90 0' });
+      for (let z = -22; z <= 22; z += 5) {
+        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `-29.2 4.5 ${z}`, rot: '0 90 0' });
       }
       // 外圍 East 牆 (10 個展位)
-      for (let z = -18; z <= 18; z += 4) {
-        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `19.8 4 ${z}`, rot: '0 -90 0' });
+      for (let z = -22; z <= 22; z += 5) {
+        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `29.2 4.5 ${z}`, rot: '0 -90 0' });
       }
 
       // 中央屏風牆雙面正面展位 (12 個展位)
       const screens = [
-        { pos: '-8 4 -6', rot: 20 },
-        { pos: '8 4 -6', rot: -20 },
-        { pos: '-8 4 8', rot: -15 },
-        { pos: '8 4 8', rot: 15 }
+        { pos: '-12 4.5 -10', rot: 20 },
+        { pos: '12 4.5 -10', rot: -20 },
+        { pos: '-12 4.5 12', rot: -15 },
+        { pos: '12 4.5 12', rot: 15 }
       ];
 
       screens.forEach((s) => {
         // 正面 A
-        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `${parseFloat(s.pos.split(' ')[0]) + 0.15} 4 ${s.pos.split(' ')[2]}`, rot: `0 ${s.rot + 90} 0` });
+        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `${parseFloat(s.pos.split(' ')[0]) + 0.3} 4.5 ${s.pos.split(' ')[2]}`, rot: `0 ${s.rot + 90} 0` });
         // 反面 B
-        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `${parseFloat(s.pos.split(' ')[0]) - 0.15} 4 ${s.pos.split(' ')[2]}`, rot: `0 ${s.rot - 90} 0` });
+        SLOT_DEFINITIONS.push({ id: `slot_${slotIdx++}`, pos: `${parseFloat(s.pos.split(' ')[0]) - 0.3} 4.5 ${s.pos.split(' ')[2]}`, rot: `0 ${s.rot - 90} 0` });
       });
     }
 
     generateSlotDefinitions();
 
-    // 4. 初始化與渲染 3D 展位
+    // 6. 初始化與渲染 3D 展位
     window.addEventListener('load', () => {
       initGallerySlots();
       updateUserUI();
@@ -353,13 +459,13 @@
 
         const occupiedData = galleryStore[slot.id];
 
-        // 為「每個展位」上方設定專屬 Spotlight 聚光燈打燈
+        // 溫馨夢想溫暖聚光燈 (暖白光)
         const spotlight = document.createElement('a-spotlight');
-        spotlight.setAttribute('position', '0 2.2 1.2');
+        spotlight.setAttribute('position', '0 2.5 1.5');
         spotlight.setAttribute('rotation', '-35 0 0');
-        spotlight.setAttribute('color', '#fff8ee');
-        spotlight.setAttribute('intensity', '1.2');
-        spotlight.setAttribute('distance', '6');
+        spotlight.setAttribute('color', '#fffbeb');
+        spotlight.setAttribute('intensity', '1.4');
+        spotlight.setAttribute('distance', '7');
         spotlight.setAttribute('angle', '45');
         slotGroup.appendChild(spotlight);
 
@@ -373,55 +479,56 @@
       });
     }
 
-    // 渲染未上傳展位
+    // 渲染未上傳展位（極簡金屬虛線框設計）
     function renderEmptySlot(group, slotId) {
       const emptyBox = document.createElement('a-plane');
-      emptyBox.setAttribute('color', '#64748b');
-      emptyBox.setAttribute('width', '2.2');
-      emptyBox.setAttribute('height', '1.6');
-      emptyBox.setAttribute('material', 'side: double; opacity: 0.25; transparent: true;');
+      emptyBox.setAttribute('color', '#0f172a');
+      emptyBox.setAttribute('width', '2.4');
+      emptyBox.setAttribute('height', '1.8');
+      emptyBox.setAttribute('material', 'side: double; opacity: 0.6; transparent: true;');
       emptyBox.setAttribute('class', 'clickable');
 
       const text = document.createElement('a-text');
       text.setAttribute('value', '＋ 點擊策展上傳');
       text.setAttribute('align', 'center');
-      text.setAttribute('color', '#f8fafc');
-      text.setAttribute('width', '3');
+      text.setAttribute('color', '#38bdf8');
+      text.setAttribute('width', '3.4');
       text.setAttribute('position', '0 0 0.02');
 
       emptyBox.appendChild(text);
 
-      emptyBox.addEventListener('click', () => {
+      emptyBox.addEventListener('click', (evt) => {
+        evt.stopPropagation(); // 避免觸發地板傳送
         handleSlotClickForUpload(slotId);
       });
 
       group.appendChild(emptyBox);
     }
 
-    // 渲染已上傳作品 (高質感名牌、不壓縮圖片原比例)
+    // 渲染已上傳作品 (高質感極細金屬框、原圖不壓縮比例)
     function renderArtSlot(group, data, slotId) {
-      // 1. PhotoVogue 極簡黑色金屬底框
+      // 1. PhotoVogue 極簡金屬底框
       const frame = document.createElement('a-box');
-      frame.setAttribute('color', '#0f172a');
-      frame.setAttribute('width', (data.aspectWidth || 2.4).toString());
-      frame.setAttribute('height', (data.aspectHeight || 1.8).toString());
-      frame.setAttribute('depth', '0.03');
-      frame.setAttribute('position', '0 0 -0.015');
+      frame.setAttribute('color', '#020617');
+      frame.setAttribute('width', (data.aspectWidth || 2.6).toString());
+      frame.setAttribute('height', (data.aspectHeight || 2.0).toString());
+      frame.setAttribute('depth', '0.04');
+      frame.setAttribute('position', '0 0 -0.02');
 
-      // 2. 相片本體（保持原始長寬比例不壓縮）
+      // 2. 相片本體（保持原始長寬比例）
       const img = document.createElement('a-image');
       img.setAttribute('src', data.url);
-      img.setAttribute('width', (data.aspectWidth || 2.3).toString());
-      img.setAttribute('height', (data.aspectHeight || 1.7).toString());
+      img.setAttribute('width', (data.aspectWidth || 2.5).toString());
+      img.setAttribute('height', (data.aspectHeight || 1.9).toString());
       img.setAttribute('position', '0 0 0.01');
       img.setAttribute('class', 'clickable');
       img.setAttribute('material', 'npot: true; anisotropy: 16; mipmaps: true;');
 
-      // 3. 正下方實體名牌 (計畫代號、作品名稱、上傳者名稱)
-      const plateY = -((data.aspectHeight || 1.8) / 2) - 0.45;
+      // 3. 正下方深色極簡名牌
+      const plateY = -((data.aspectHeight || 2.0) / 2) - 0.45;
       const plate = document.createElement('a-plane');
       plate.setAttribute('color', '#0f172a');
-      plate.setAttribute('width', '2.4');
+      plate.setAttribute('width', '2.5');
       plate.setAttribute('height', '0.65');
       plate.setAttribute('position', `0 ${plateY} 0.01`);
 
@@ -437,12 +544,13 @@
       group.appendChild(img);
       group.appendChild(plate);
 
-      img.addEventListener('click', () => {
+      img.addEventListener('click', (evt) => {
+        evt.stopPropagation(); // 避免觸發地板傳送
         openArtModal(slotId);
       });
     }
 
-    // 5. 使用者權限與登入邏輯
+    // 7. 使用者權限與登入邏輯
     function openLoginModal() { openModal('login-modal'); }
 
     function submitLogin() {
@@ -484,7 +592,7 @@
       return count;
     }
 
-    // 6. 點擊展位與上傳圖片控制 (保持原圖比例)
+    // 8. 點擊展位與上傳圖片控制 (保持原圖比例)
     function handleSlotClickForUpload(slotId) {
       if (!currentUser) {
         alert('觀賞者無法直接上傳作品！請先點擊頂部「策展人登入」建立基本資料。');
@@ -522,12 +630,12 @@
       reader.onload = function(evt) {
         const img = new Image();
         img.onload = function() {
-          // 計算原圖真實比例，避免壓縮变形
-          let aspectWidth = 2.4;
-          let aspectHeight = 2.4 * (img.height / img.width);
-          if (aspectHeight > 2.8) {
-            aspectHeight = 2.8;
-            aspectWidth = 2.8 * (img.width / img.height);
+          // 計算原圖比例，完全不壓縮变形
+          let aspectWidth = 2.6;
+          let aspectHeight = 2.6 * (img.height / img.width);
+          if (aspectHeight > 3.0) {
+            aspectHeight = 3.0;
+            aspectWidth = 3.0 * (img.width / img.height);
           }
 
           const artData = {
@@ -549,7 +657,6 @@
           updateUserUI();
           closeModal('upload-modal');
 
-          // 廣播給其他連線者
           if (window.NAF && NAF.connection && NAF.connection.isConnected()) {
             NAF.connection.broadcastData('new-art-uploaded', artData);
           }
@@ -560,7 +667,7 @@
       reader.readAsDataURL(file);
     }
 
-    // 7. 作品彈窗與刪除機制（僅限本人可刪除）
+    // 9. 作品彈窗與刪除機制（僅限本人操作）
     function openArtModal(slotId) {
       currentActiveArt = galleryStore[slotId];
       if (!currentActiveArt) return;
@@ -571,7 +678,6 @@
       document.getElementById('modal-desc').textContent = currentActiveArt.desc || '暫無作品描述。';
       document.getElementById('modal-img-preview').src = currentActiveArt.url;
 
-      // 檢查是否為本人上傳，顯示刪除按鈕
       const deleteContainer = document.getElementById('owner-delete-container');
       if (currentUser && currentActiveArt.user && currentUser.id === currentActiveArt.user.id) {
         deleteContainer.style.display = 'block';
@@ -604,7 +710,7 @@
       }
     }
 
-    // 8. 留言板系統
+    // 10. 留言板系統
     function submitComment() {
       const input = document.getElementById('comment-input');
       const text = input.value.trim();
@@ -637,7 +743,7 @@
       list.scrollTop = list.scrollHeight;
     }
 
-    // 9. 後台紀錄數據 UI (Admin Dashboard)
+    // 11. 後台紀錄數據 UI (Admin Dashboard)
     function openAdminModal() {
       const tbody = document.getElementById('admin-table-body');
       tbody.innerHTML = '';
@@ -667,7 +773,7 @@
     function openLightbox() { if (currentActiveArt) { document.getElementById('lightbox-img').src = currentActiveArt.url; document.getElementById('full-lightbox').style.display = 'flex'; } }
     function closeLightbox() { document.getElementById('full-lightbox').style.display = 'none'; }
 
-    // 10. Multi-user 連線廣播監聽
+    // 12. Multi-user 連線廣播監聽
     document.body.addEventListener('connected', function () {
       NAF.connection.subscribeToData('new-art-uploaded', (senderId, dataType, data) => {
         galleryStore[data.id] = data;
