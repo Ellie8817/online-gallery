@@ -765,26 +765,32 @@
 
       const items = Object.values(galleryStore);
       if (items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">目前尚無任何展位資料</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">目前尚無任何上傳紀錄</td></tr>';
       } else {
-        items.forEach(item => {
+        items.forEach(art => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${item.user.name}</td>
-            <td>${item.user.program} / ${item.user.batch}</td>
-            <td>${item.user.code}</td>
-            <td>${item.title}</td>
-            <td>${item.id}</td>
+            <td><b>${art.user ? art.user.name : '未知'}</b></td>
+            <td>${art.user ? art.user.program : '-'} / ${art.user ? art.user.batch : '-'}</td>
+            <td><code>${art.user ? art.user.code : '-'}</code></td>
+            <td>${art.title}</td>
+            <td><span style="color:#0284c7; font-weight:600;">${art.id}</span></td>
           `;
           tbody.appendChild(tr);
         });
       }
+
       openModal('admin-modal');
     }
 
-    // 12. Modal 控制與大圖燈箱
-    function openModal(id) { document.getElementById(id).style.display = 'block'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    // 12. Modal 控制與燈箱邏輯
+    function openModal(id) {
+      document.getElementById(id).style.display = 'block';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
 
     function openLightbox() {
       if (!currentActiveArt) return;
@@ -795,6 +801,23 @@
     function closeLightbox() {
       document.getElementById('full-lightbox').style.display = 'none';
     }
+
+    // 13. Networked-AFrame 多人即時同步事件監聽
+    document.body.addEventListener('connected', function () {
+      if (window.NAF && NAF.connection) {
+        NAF.connection.subscribeData('new-art-uploaded', (senderId, dataType, data) => {
+          galleryStore[data.id] = data;
+          localStorage.setItem('YOUTH_GALLERY_STORE', JSON.stringify(galleryStore));
+          initGallerySlots();
+        });
+
+        NAF.connection.subscribeData('art-deleted', (senderId, dataType, data) => {
+          delete galleryStore[data.id];
+          localStorage.setItem('YOUTH_GALLERY_STORE', JSON.stringify(galleryStore));
+          initGallerySlots();
+        });
+      }
+    });
   </script>
 </body>
 </html>
